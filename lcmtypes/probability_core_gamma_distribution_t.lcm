@@ -1,0 +1,10 @@
+
+package probability_core;
+
+struct gamma_distribution_t 
+{
+
+	double shape;
+	double rate;
+
+}

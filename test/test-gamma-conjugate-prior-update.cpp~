@@ -1,0 +1,22 @@
+#include <probability-core/distributions.hpp>
+#include <probability-core/distribution_utils.hpp>
+#include <iostream>
+
+using namespace probability_core;
+
+int main()
+{
+
+  // create prior
+  double p = 1;
+  double q = 2;
+  double r = 2;
+  double s = 2;
+  gamma_conjugate_prior_t gcp = { p, q, r, s };
+ 
+  
+  // ok, create gamma priors for the parameters
+  
+
+  return 0;
+}

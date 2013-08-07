@@ -1,0 +1,12 @@
+
+package probability_core;
+
+
+struct gamma_conjugate_prior_t {
+
+       double p;
+       double q;
+       double r;
+       double s;
+
+}

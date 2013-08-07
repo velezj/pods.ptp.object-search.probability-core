@@ -1,0 +1,38 @@
+
+
+#include <probability-core/distributions.hpp>
+#include <probability-core/distribution_utils.hpp>
+#include <iostream>
+#include <sstream>
+
+using namespace probability_core;
+
+int main( int argn, char** argv )
+{
+
+  // create prior
+  double p = 1;;
+  double q = 2;
+  double r = 2;
+  double s = 2;
+  std::istringstream iss ( argv[1] );
+  iss >> p;
+  iss.str( argv[ 2 ] );
+  iss >> q;
+  iss.str( argv[ 3 ] );
+  iss >> r;
+  iss.str( argv[ 4 ] );
+  iss >> s;
+  std::cout << "args: " << p << " " << q << " " << r << " " << s << std::endl;
+
+  gamma_conjugate_prior_t gcp = { p, q, r, s };
+  
+
+  for( size_t i = 0; i < 10; ++i ) {
+    gamma_distribution_t gamma = sample_from( gcp );
+    std::cout << "sampled: " << gamma << "  lik(.)=" << likelihood( gamma, gcp ) << std::endl;
+  }
+
+
+  return 0;
+}

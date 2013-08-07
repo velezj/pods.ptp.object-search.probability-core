@@ -1,0 +1,8 @@
+
+package probability_core;
+
+struct negative_binomial_distribution_t 
+{
+	double r;
+	double p;
+}

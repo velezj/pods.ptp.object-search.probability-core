@@ -1,0 +1,10 @@
+
+package probability_core;
+
+struct beta_distribution_t 
+{
+
+	double alpha;
+	double beta;
+
+}

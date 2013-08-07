@@ -1,0 +1,8 @@
+package probability_core;
+
+struct gaussian_distribution_t
+{
+	int32_t dimension;
+	double means[ dimension ];
+	math_core.dense_matrix_t covariance;
+}

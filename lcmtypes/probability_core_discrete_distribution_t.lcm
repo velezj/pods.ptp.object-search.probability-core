@@ -1,0 +1,8 @@
+
+package probability_core;
+
+struct discrete_distribution_t
+{
+	int32_t n;
+	double prob[ n ];
+}
