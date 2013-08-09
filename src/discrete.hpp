@@ -1,7 +1,7 @@
 #if !defined( __PROBABILITY_CORE_DISCRETE_HPP__ )
 #define __PROBABILITY_CORE_DISCRETE_HPP__
 
-#include "lcmtypes/probability_core.hpp"
+#include "lcmtypes/p2l_probability_core.hpp"
 
 namespace probability_core {
 

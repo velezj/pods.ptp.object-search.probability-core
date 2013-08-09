@@ -2,7 +2,7 @@
 #define __PROBABILITY_CORE_BETA_HPP__
 
 
-#include "lcmtypes/probability_core.hpp"
+#include "lcmtypes/p2l_probability_core.hpp"
 
 
 namespace probability_core {

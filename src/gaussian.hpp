@@ -2,8 +2,8 @@
 #if !defined( __PROBABILITY_CORE_GAUSSIAN_HPP__ )
 #define __PROBABILITY_CORE_GAUSSIAN_HPP__
 
-#include "lcmtypes/probability_core.hpp"
-#include <lcmtypes/math_core.hpp>
+#include "lcmtypes/p2l_probability_core.hpp"
+#include <lcmtypes/p2l_math_core.hpp>
 #include <math-core/geom.hpp>
 #include <math-core/math_function.hpp>
 

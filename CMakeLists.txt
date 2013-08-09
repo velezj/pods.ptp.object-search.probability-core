@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6.0)
 
 # pull in the pods macros. See cmake/pods.cmake for documentation
-set(POD_NAME probability-core)
+set(POD_NAME p2l-probability-core)
 include(cmake/pods.cmake)
 
 # automatically build LCM types.  This also defines a number of CMake
@@ -9,15 +9,6 @@ include(cmake/pods.cmake)
 include(cmake/lcmtypes.cmake)
 lcmtypes_build()
 
-# build two LCM test programs
-add_executable(send_message src/send_message.c)
-pods_use_pkg_config_packages(send_message lcm lcmtypes_${POD_NAME})
-
-add_executable(listener src/listener.c)
-pods_use_pkg_config_packages(listener lcm lcmtypes_${POD_NAME})
-
-# make exeutables public
-pods_install_executables(send_message listener)
 
 
 
@@ -28,7 +19,7 @@ add_definitions( -std=c++0x -pedantic -Wall )
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
 
 # The probability-core library
-add_library( probability-core SHARED
+add_library( p2l-probability-core SHARED
   src/core.cpp
   src/gamma.cpp
   src/beta.cpp
@@ -56,30 +47,36 @@ pods_install_headers(
   src/toms462.hpp
   DESTINATION
   probability-core )
-pods_use_pkg_config_packages(probability-core gsl math-core lcmtypes_probability-core lcmtypes_math-core boost-1.51.0)
-pods_install_libraries( probability-core )
-pods_install_pkg_config_file(probability-core
+pods_use_pkg_config_packages(p2l-probability-core gsl p2l-math-core lcmtypes_p2l-probability-core lcmtypes_p2l-math-core boost-1.54.0)
+pods_install_libraries( p2l-probability-core )
+pods_install_pkg_config_file(p2l-probability-core
     CFLAGS
-    LIBS -lprobability-core
-    REQUIRES gsl math-core boost-1.51.0
+    LIBS -lp2l-probability-core
+    REQUIRES gsl-1.16 p2l-math-core boost-1.54.0
     VERSION 0.0.1)
 
 
 
 # The probability-core-graphics library
-add_library( probability-core-graphics SHARED
+add_library( p2l-probability-core-graphics SHARED
   src/graphics/lcmgl_distributions.cpp
   )
 pods_install_headers( 
   src/graphics/lcmgl_distributions.hpp
   DESTINATION
   probability-core-graphics )
-pods_use_pkg_config_packages(probability-core-graphics gsl math-core probability-core lcmtypes_probability-core lcmtypes_math-core bot2-lcmgl-client)
-pods_install_libraries( probability-core-graphics )
-pods_install_pkg_config_file(probability-core-graphics
+pods_use_pkg_config_packages(p2l-probability-core-graphics 
+    gsl-1.16 
+    p2l-math-core 
+    p2l-probability-core 
+    lcmtypes_p2l-probability-core 
+    lcmtypes_p2l-math-core 
+    bot2-lcmgl-client)
+pods_install_libraries( p2l-probability-core-graphics )
+pods_install_pkg_config_file(p2l-probability-core-graphics
     CFLAGS
-    LIBS -lprobability-core-graphics
-    REQUIRES gsl math-core bot2-lcmgl-client
+    LIBS -lp2l-probability-core-graphics
+    REQUIRES gsl-1.16 p2l-math-core bot2-lcmgl-client p2l-probability-core
     VERSION 0.0.1)
 
 
