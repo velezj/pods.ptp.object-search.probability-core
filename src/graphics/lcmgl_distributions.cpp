@@ -36,9 +36,9 @@ namespace probability_core {
       }
 
       // positive sigma
-      for( long i = 0; i < num_per_level.size(); ++i ) {
+      for( size_t i = 0; i < num_per_level.size(); ++i ) {
 	double step = sigma / num_per_level[i];
-	for( long k = 0; k < num_per_level[i]; ++k ) {
+	for( size_t k = 0; k < num_per_level[i]; ++k ) {
 	  double p = mean + ( i * sigma + k * step );
 	  if( p >= min && p <= max ) {
 	    //std::cout << " varpoint+ p: " << p << " i=" << i << " sigma=" << sigma << " k=" << k << " mean=" << mean << " step=" << step << std::endl;
@@ -163,7 +163,7 @@ namespace probability_core {
 		       const discrete_distribution_t& dist )
     {
       std::vector<unsigned int> points;
-      for( std::size_t i = 0; i < dist.n; ++i ) {
+      for( std::size_t i = 0; (long)i < dist.n; ++i ) {
 	points.push_back(i);
       }
       draw_1d_step( lcmgl, dist, points );

@@ -36,7 +36,7 @@ int main( int argn, char** argv )
 
   // sample gamma from the prior
   int num_gamma_samples = 10;
-  for( size_t i = 0; i < num_gamma_samples; ++i ) {
+  for( size_t i = 0; (long)i < num_gamma_samples; ++i ) {
     gamma_distribution_t gamma = sample_from( gcp );
     std::cout << "sampled: " << gamma << "  lik(.)=" << likelihood( gamma, gcp ) << std::endl;
   }

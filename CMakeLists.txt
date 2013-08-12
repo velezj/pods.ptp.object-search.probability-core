@@ -15,8 +15,14 @@ lcmtypes_build()
 #set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -O2 -g")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -O0 -g3")
 
-add_definitions( -std=c++0x -pedantic -Wall )
+add_definitions( -Wall -fdiagnostics-show-option )
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
+
+option ( USE_PEDANTIC "Turn on -pendantic mode in gcc. This will spit out *lots* of warnings from lcm :-(, but hopefully none from the rest of the code" OFF)
+if( USE_PEDANTIC )
+    add_definitions( -pedantic )
+endif (USE_PEDANTIC)
+
 
 # The probability-core library
 add_library( p2l-probability-core SHARED

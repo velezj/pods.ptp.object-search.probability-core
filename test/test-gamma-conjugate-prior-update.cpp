@@ -78,12 +78,12 @@ int main()
   gamma_distribution_t q_prior;
   q_prior.shape = 1;
   q_prior.rate = 0.5;
-  gamma_distribution_t r_prior;
-  r_prior.shape = 1;
-  r_prior.rate = 0.5;
-  gamma_distribution_t s_prior;
-  s_prior.shape = 1;
-  s_prior.rate = 0.5;
+  //gamma_distribution_t r_prior;
+  //r_prior.shape = 1;
+  //r_prior.rate = 0.5;
+  //gamma_distribution_t s_prior;
+  //s_prior.shape = 1;
+  //s_prior.rate = 0.5;
 
   // now, get some "observed" gammas
   std::vector<gamma_distribution_t> observed_gammas;
@@ -98,9 +98,9 @@ int main()
 		 gcp,
 		 p_prior,
 		 'p' );
-  double p_min = 0.001;
-  double p_max = 1000;
-  double p_step = 0.1;
+  //double p_min = 0.001;
+  //double p_max = 1000;
+  //double p_step = 0.1;
   // for( double p = p_min; p < p_max; p += p_step ) {
   //   double p_lik = p_posterior( p );
   //   std::cout << p << " " << p_lik << std::endl;

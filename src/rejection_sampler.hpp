@@ -75,7 +75,7 @@ namespace probability_core {
     {
       // generate each coordinate eseparately
       math_core::nd_point_t p = math_core::zero_point( window.start.n );
-      for( std::size_t i = 0; i < p.n; ++i ) {
+      for( std::size_t i = 0; (long)i < p.n; ++i ) {
 	p.coordinate[i] = window.start.coordinate[i] + (window.end.coordinate[i] - window.start.coordinate[i]) * gsl_rng_uniform( global_rng() );
       }
       return p;
@@ -113,11 +113,11 @@ namespace probability_core {
 
     std::vector<T_Domain> sampled_x;
     std::vector<double> sampled_p;
-    T_Domain max_x;
-    double max_p;
+    T_Domain max_x = T_Domain();
+    double max_p = double();
 
     int max_samples = 100000;
-    int max_history_size = 0;
+    size_t max_history_size = 0;
     int num_samples_to_warn = max_samples / 1;
 
     // loop while we have not picked a good sample
@@ -173,7 +173,12 @@ namespace probability_core {
 	std::cout << "**  rejection sampler returning max sampled!!!" << std::endl;
 	clock_t end_clock = clock();
 	status.seconds = (double)( end_clock - start_clock ) / CLOCKS_PER_SEC;
-	return max_x;
+	
+	if( sampled_x.empty() ) {
+	  return uniform_sampler();
+	} else {
+	  return max_x;
+	}
       }
     }
 

@@ -628,6 +628,7 @@ void timestamp ( )
   tm = localtime ( &now );
 
   len = strftime ( time_buffer, TIME_SIZE, "%d %B %Y %I:%M:%S %p", tm );
+  len = len + 1 - 1;
 
   cout << time_buffer << "\n";
 

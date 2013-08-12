@@ -119,9 +119,9 @@ namespace probability_core {
 			    const gaussian_distribution_t& gauss )
   {
     os << "N( " << point(gauss.means) << " [";
-    for( size_t i = 0; i < gauss.covariance.num_elements; ++i ) {
+    for( size_t i = 0; (long)i < gauss.covariance.num_elements; ++i ) {
       os << gauss.covariance.data[i];
-      if( i + 1 < gauss.covariance.num_elements ) 
+      if( (long)(i + 1) < gauss.covariance.num_elements ) 
 	os << ", ";
     }
     os << "] )";
@@ -143,9 +143,9 @@ namespace probability_core {
 			    const discrete_distribution_t& dist )
   {
     os << "Dis(";
-    for( size_t i = 0; i < dist.n; ++i ) {
+    for( size_t i = 0; (long)i < dist.n; ++i ) {
       os << dist.prob[i];
-      if( i + 1 < dist.n ) {
+      if( (long)(i + 1) < dist.n ) {
 	os << ",";
       }
     }
@@ -249,7 +249,7 @@ namespace probability_core {
     if( DEBUG_VERBOSE ) {
       std::cout << "     sample mean gauss prior:" << std::endl;
       std::cout << "      obs: ";
-      for( int i = 0; i < observed_means.size(); ++i ) {
+      for( size_t i = 0; i < observed_means.size(); ++i ) {
 	std::cout << observed_means[i] << " ";
       }
       std::cout << std::endl;
@@ -324,7 +324,7 @@ namespace probability_core {
     if( DEBUG_VERBOSE ) {
       std::cout << "     sample mean gauss prior:" << std::endl;
       std::cout << "      obs: ";
-      for( int i = 0; i < observed_means.size(); ++i ) {
+      for( size_t i = 0; i < observed_means.size(); ++i ) {
 	std::cout << observed_means[i] << " ";
       }
       std::cout << std::endl;
@@ -397,7 +397,7 @@ namespace probability_core {
     if( DEBUG_VERBOSE ) {
       std::cout << "     Sample Precision Prior: " << std::endl;
       std::cout << "      prec obs: ";
-      for( int i = 0; i < precisions.size(); ++i ) {
+      for( size_t i = 0; i < precisions.size(); ++i ) {
 	std::cout << precisions[i] << " ";
       }
       std::cout << std::endl;

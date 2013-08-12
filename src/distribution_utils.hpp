@@ -5,6 +5,7 @@
 #include "distributions.hpp"
 #include <iosfwd>
 #include <gsl/gsl_sf_gamma.h>
+#include <cmath>
 
 namespace probability_core {
 
@@ -123,9 +124,9 @@ namespace probability_core {
   	return 0.0;
       if( h < 0.00001 )
   	return 0.0;
-      double r = 1.0 / pow( h, k );
-      r *= pow( b * rate / 2.0, (k * b - 3.0) / 2.0 );
-      r *= exp( - 1.0 / ( 2.0 * b ) );
+      double r = 1.0 / std::pow( h, k );
+      r *= std::pow( b * rate / 2.0, (k * b - 3.0) / 2.0 );
+      r *= std::exp( - 1.0 / ( 2.0 * b ) );
       // double factor =1 ;
       // for( std::size_t i = 0; i < observed_precisions.size(); ++i ) {
       // 	double prec = observed_precisions[i];
