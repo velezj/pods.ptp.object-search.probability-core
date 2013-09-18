@@ -53,6 +53,7 @@ namespace functions {
       gaussian_pdf_t( const probability_core::gaussian_distribution_t& g )
 	: g(g)
       {}
+      virtual ~gaussian_pdf_t() {};
       double operator() ( const math_core::nd_point_t& x ) const
       {
 	return probability_core::pdf( x, g );
