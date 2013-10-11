@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include <gsl/gsl_sf_gamma.h>
 #include <cmath>
+#include <string>
 
 namespace probability_core {
 
@@ -165,7 +166,16 @@ namespace probability_core {
 			    const negative_binomial_distribution_t& ng );
   std::ostream& operator<< (std::ostream& os,
 			    const gamma_conjugate_prior_t& gcp );
-  
+
+
+  std::string to_json( const gaussian_distribution_t& gauss );
+  std::string to_json( const gamma_distribution_t& gamma );
+  std::string to_json( const gamma_conjugate_prior_t& gcp );
+  std::string to_json( const poisson_distribution_t& pos );
+  std::string to_json( const negative_binomial_distribution_t& nb );
+  std::string to_json( const beta_distribution_t& beta );
+  std::string to_json( const discrete_distribution_t& dist );
+
 }
 
 #endif

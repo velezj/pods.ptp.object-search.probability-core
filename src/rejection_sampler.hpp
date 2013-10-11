@@ -7,6 +7,7 @@
 #include "core.hpp"
 #include "distribution_utils.hpp"
 #include <math-core/extrema.hpp>
+#include <math-core/gsl_utils.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/optional.hpp>
@@ -111,6 +112,12 @@ namespace probability_core {
 
     clock_t start_clock = clock();
 
+    bool verbose = true;
+
+    // ignore Overflow/Underflow for this
+    //gsl_error_handler_scope( gsl_ignore_representation_errors );
+    gsl_error_handler_t* old_gsl_error_handler = gsl_set_error_handler_off();
+
     std::vector<T_Domain> sampled_x;
     std::vector<double> sampled_p;
     T_Domain max_x = T_Domain();
@@ -118,7 +125,7 @@ namespace probability_core {
 
     int max_samples = 100000;
     size_t max_history_size = 0;
-    int num_samples_to_warn = max_samples / 1;
+    int num_samples_to_warn = max_samples / 10;
 
     // loop while we have not picked a good sample
     while( true ) {
@@ -144,6 +151,8 @@ namespace probability_core {
 	// debug
 	//std::cout << "    --rej: " << status.iterations << " (" << status.seconds << ")" << std::endl;
 
+	gsl_set_error_handler( old_gsl_error_handler );
+
 	return proposed_sample;
       }
 
@@ -164,16 +173,19 @@ namespace probability_core {
       }
       
       if( (int)(status.iterations) % num_samples_to_warn == 0 &&
-	  status.iterations >= num_samples_to_warn ) {
+	  status.iterations >= num_samples_to_warn &&
+	  verbose ) {
 	std::cout << "[" << status.iterations << "] max x: " << max_x << " p=" << max_p << std::endl;
       }
 
       // if too many iterations, just return max sampled
-      if( status.iterations > max_samples ) {
+      if( verbose && status.iterations > max_samples ) {
 	std::cout << "**  rejection sampler returning max sampled!!!" << std::endl;
 	clock_t end_clock = clock();
 	status.seconds = (double)( end_clock - start_clock ) / CLOCKS_PER_SEC;
-	
+
+	gsl_set_error_handler( old_gsl_error_handler );
+
 	if( sampled_x.empty() ) {
 	  return uniform_sampler();
 	} else {

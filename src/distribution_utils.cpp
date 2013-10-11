@@ -4,6 +4,7 @@
 #include <math-core/io.hpp>
 #include <math-core/matrix.hpp>
 #include <iostream>
+#include <sstream>
 #include <gsl/gsl_randist.h>
 #include "core.hpp"
 #include "rejection_sampler.hpp"
@@ -413,12 +414,96 @@ namespace probability_core {
   
   //=======================================================================
   //=======================================================================
+
+  std::string to_json( const gaussian_distribution_t& gauss ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"gaussian_distribution_t\" , ";
+    oss << "  \"mean\" : [ ";
+    for( size_t i = 0; i < gauss.dimension; ++i ) {
+      oss << gauss.means[0];
+      if( i < gauss.dimension - 1 ) {
+	oss << ",";
+      }
+    }
+    oss << "], ";
+    oss << "  \"covariance\" : " << to_json( gauss.covariance );
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+
+  std::string to_json( const gamma_distribution_t& gamma ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"gamma_distribution_t\" , ";
+    oss << "  \"shape\" : " << gamma.shape << " , ";
+    oss << "  \"rate\" : " << gamma.rate;
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+
+  std::string to_json( const gamma_conjugate_prior_t& gcp ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"gamma_conjugate_prior_t\" , ";
+    oss << "  \"p\" : " << gcp.p << " , ";
+    oss << "  \"q\" : " << gcp.q << " , ";
+    oss << "  \"r\" : " << gcp.r << " , ";
+    oss << "  \"s\" : " << gcp.s;
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+
+  std::string to_json( const beta_distribution_t& beta ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"beta_distribution_t\" , ";
+    oss << "  \"alpha\" : " << beta.alpha << " , ";
+    oss << "  \"beta\" : " << beta.beta;
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+
+  std::string to_json( const poisson_distribution_t& pos ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"poisson_distribution_t\" , ";
+    oss << "  \"lambda\" : " << pos.lambda;
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+
+  std::string to_json( const negative_binomial_distribution_t& nb ) {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"negative_binomial_distribution_t\" , ";
+    oss << "  \"r\" : " << nb.r << " , ";
+    oss << "  \"p\" : " << nb.p;
+    oss << " }";
+    return oss.str();
+  }
+
   //=======================================================================
+  
+  std::string to_json( const discrete_distribution_t& dist )
+  {
+    std::ostringstream oss;
+    oss << "{ \"object_class\" : \"discrete_distribution_t\" , ";
+    oss << "  \"prob\" : [ ";
+    for( size_t i = 0; i < dist.prob.size(); ++i ) {
+      oss << dist.prob[i];
+      if( i < dist.prob.size() - 1 ) {
+	oss << ",";
+      }
+    }
+    oss << "] }";
+    return oss.str();
+  }
+  
   //=======================================================================
   //=======================================================================
   //=======================================================================
