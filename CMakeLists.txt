@@ -15,7 +15,7 @@ lcmtypes_build()
 #set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -O2 -g")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -O0 -g3")
 
-add_definitions( -Wall -fdiagnostics-show-option )
+add_definitions( -std=c++0x -Wall -fdiagnostics-show-option )
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
 
 option ( USE_PEDANTIC "Turn on -pendantic mode in gcc. This will spit out *lots* of warnings from lcm :-(, but hopefully none from the rest of the code" OFF)
@@ -37,6 +37,7 @@ add_library( p2l-probability-core SHARED
   src/distributions.cpp
   src/distribution_utils.cpp
   src/toms462.cpp
+  src/gibbs_sampler.cpp
   )
 pods_install_headers( 
   src/core.hpp
@@ -47,10 +48,13 @@ pods_install_headers(
   src/gaussian.hpp
   src/discrete.hpp
   src/gamma_conjugate_prior.hpp
+  src/uniform.hpp
   src/distributions.hpp
   src/distribution_utils.hpp
   src/rejection_sampler.hpp
   src/toms462.hpp
+  src/slice_sampler.hpp
+  src/gibbs_sampler.hpp
   DESTINATION
   probability-core )
 pods_use_pkg_config_packages(p2l-probability-core gsl p2l-math-core lcmtypes_p2l-probability-core lcmtypes_p2l-math-core boost-1.54.0)

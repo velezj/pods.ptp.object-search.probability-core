@@ -20,7 +20,7 @@ namespace probability_core {
 
   // Description:
   // Flip a coin and return true iff heads, otehrwise tails
-  bool flip_coin( const double& p );
+  bool flip_coin( const double& p = 0.5 );
 
 
 
