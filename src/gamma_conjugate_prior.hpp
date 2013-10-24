@@ -19,7 +19,9 @@ namespace probability_core {
   
   gamma_distribution_t
   sample_from( const gamma_conjugate_prior_t& gcp );
-  
+
+  gamma_distribution_t
+  slice_sample_from( const gamma_conjugate_prior_t& gcp );
 
   //double
   //mean( const gamma_conjugate_prior_t& gcp );

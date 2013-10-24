@@ -35,16 +35,22 @@ int main( int argn, char** argv )
   
 
   // sample gamma from the prior
-  int num_gamma_samples = 10;
+  int num_gamma_samples = 1000;
   for( size_t i = 0; (long)i < num_gamma_samples; ++i ) {
     gamma_distribution_t gamma = sample_from( gcp );
     std::cout << "sampled: " << gamma << "  lik(.)=" << likelihood( gamma, gcp ) << std::endl;
   }
 
+  // sample using slice sampler
+  for( size_t i = 0; i < num_gamma_samples; ++i ) {
+    gamma_distribution_t gamma = slice_sample_from( gcp );
+    std::cout << "slice sampled: " << gamma << "  lik(.)=" << likelihood( gamma, gcp ) << std::endl;
+  }
+
 
   // Ok, now calculate the resulting mean/variance
   double m,v;
-  int num_samples = 10000;
+  int num_samples = 1000;
   estimate_gamma_conjugate_prior_sample_stats( gcp, m, v, num_samples );
   std::cout << "Rollout Estimate Mean: " << m << " , Var: " << v << std::endl;
 

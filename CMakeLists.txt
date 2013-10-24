@@ -34,6 +34,7 @@ add_library( p2l-probability-core SHARED
   src/gaussian.cpp
   src/discrete.cpp
   src/gamma_conjugate_prior.cpp
+  src/uniform.cpp
   src/distributions.cpp
   src/distribution_utils.cpp
   src/toms462.cpp

@@ -6,8 +6,10 @@
 #include <gsl/gsl_monte.h>
 //#include <gsl/gsl_monte_miser.h>
 #include <gsl/gsl_monte_vegas.h>
+#include "slice_sampler.hpp"
 
 
+using namespace math_core;
 
 namespace probability_core {
   
@@ -224,6 +226,33 @@ namespace probability_core {
     return fixed;
   }
 
+  //====================================================================
+  //====================================================================
+
+  gamma_distribution_t
+  slice_sample_from( const gamma_conjugate_prior_t& gcp ) 
+  {
+    static std::pair<nd_point_t,nd_point_t> support( point( 0.0, 0.0),
+						     point( 1000.0, 1000.0 ) );
+    static slice_sampler_workplace_t<nd_point_t> workspace(support);
+    boost::function<double(const nd_point_t&)> lik = 
+      [gcp](const nd_point_t& args){ gamma_distribution_t g;
+				     g.shape = args.coordinate[0];
+				     g.rate = args.coordinate[1];
+				     return likelihood( g, gcp ); };
+    nd_point_t params = slice_sample( lik,
+				      workspace,
+				      0.001 );
+    gamma_distribution_t gamma;
+    gamma.shape = params.coordinate[0];
+    gamma.rate = params.coordinate[1];
+    return gamma;
+  }
+
+  //====================================================================
+  //====================================================================
+  //====================================================================
+  //====================================================================
   //====================================================================
   //====================================================================
 

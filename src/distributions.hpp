@@ -9,6 +9,7 @@
 #include "gaussian.hpp"
 #include "discrete.hpp"
 #include "gamma_conjugate_prior.hpp"
+#include "uniform.hpp"
 
 //========================================================================
 
