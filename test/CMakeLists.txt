@@ -63,5 +63,5 @@ pods_install_executables( probability-core-test-slice-sampler )
 
 add_executable( probability-core-test-gibbs-sampler
   test-gibbs-sampler.cpp )
-pods_use_pkg_config_packages( probability-core-test-slice-sampler gsl-1.16 p2l-probability-core lcmtypes_p2l-probability-core p2l-math-core lcmtypes_p2l-math-core boost-1.54.0 )
+pods_use_pkg_config_packages( probability-core-test-gibbs-sampler gsl-1.16 p2l-probability-core lcmtypes_p2l-probability-core p2l-math-core lcmtypes_p2l-math-core boost-1.54.0 )
 pods_install_executables( probability-core-test-gibbs-sampler )
