@@ -37,6 +37,7 @@ add_library( p2l-probability-core SHARED
   src/distributions.cpp
   src/distribution_utils.cpp
   src/toms462.cpp
+  src/slice_sampler.cpp
   src/gibbs_sampler.cpp
   )
 pods_install_headers( 

@@ -4,6 +4,7 @@
 #include <utility>
 #include <boost/random.hpp>
 #include <boost/numeric/interval.hpp>
+#include <math-core/geom.hpp>
 //#include <boost/static_assert.hpp>
 
 namespace probability_core {
@@ -72,7 +73,17 @@ namespace probability_core {
     boost::random::uniform_real_distribution<double> real( u.support.first, u.support.second );
     return real(engine);
   }
-
+  template<>
+  math_core::nd_point_t
+  sample_from( const uniform_distribution_t<math_core::nd_point_t>& u )
+  {
+    std::vector<double> c;
+    for( int64_t i = 0; i < u.support.first.n; ++i ) {
+      c.push_back( sample_from( uniform_distribution( u.support.first.coordinate[i],
+						      u.support.second.coordinate[i]) ) );
+    }
+    return math_core::point( c );
+  }
   
 
   template<class Support_Type>

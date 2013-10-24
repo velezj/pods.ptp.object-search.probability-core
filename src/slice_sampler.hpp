@@ -145,6 +145,15 @@ namespace probability_core {
   }
 
   //=======================================================================
+
+  // Description:
+  // Sample from a joint using a joint slice sampling method.
+  math_core::nd_point_t
+  slice_sample( const boost::function<double (const math_core::nd_point_t&)>& f,
+		slice_sampler_workplace_t<math_core::nd_point_t>& workplace,
+		double initial_slice_fraction = 0.00001 );  
+
+  //=======================================================================
   
 
 }
