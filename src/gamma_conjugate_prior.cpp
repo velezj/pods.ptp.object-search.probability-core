@@ -7,6 +7,10 @@
 //#include <gsl/gsl_monte_miser.h>
 #include <gsl/gsl_monte_vegas.h>
 #include "slice_sampler.hpp"
+#include <boost/bind.hpp>
+#include <limits>
+#include <p2l-common/stat_counter.hpp>
+#include <p2l-common/context.hpp>
 
 
 using namespace math_core;
@@ -19,6 +23,8 @@ namespace probability_core {
   likelihood( const gamma_distribution_t& gamma,
 	      const gamma_conjugate_prior_t& gcp )
   {
+    P2L_COMMON_push_function_context();
+
     // Ok, if the rate or shape of hte gamma aar too large,
     // fake them out using the same ratio but smaller
     if( gamma.shape > 20 &&
@@ -99,7 +105,8 @@ namespace probability_core {
   gamma_distribution_t
   sample_from( const gamma_conjugate_prior_t& gcp )
   {
-    
+    P2L_COMMON_push_function_context();
+
     // we are going to use rejection sampling here
     // but first we need to estimate a scaling for the sampling.
 
@@ -133,6 +140,9 @@ namespace probability_core {
 
     } while( fabs( gsl_monte_vegas_chisq(s) - 1.0 ) > 0.5 &&
 	     num_tries < max_tries);
+
+    STAT( "mc.vegas.tries", (double)num_tries );
+    STAT( "mc.vegas.chisq", gsl_monte_vegas_chisq(s) );
 
     // free resources
     gsl_monte_vegas_free( s );
@@ -181,6 +191,8 @@ namespace probability_core {
     double& var_result,
     const int num_samples )
   {
+    P2L_COMMON_push_function_context();
+
     mean_result = 0;
     var_result = 0;
     for( int i = 0; i < num_samples; ++i ) {
@@ -229,17 +241,32 @@ namespace probability_core {
   //====================================================================
   //====================================================================
 
+  double temp_lik( const nd_point_t& args,
+		   const gamma_conjugate_prior_t& gcp )
+  {
+    assert( args.n == 2 );
+    assert( !undefined( args ) );
+    if( undefined( args ) )
+      return 0.0;
+    if( args.n != 2 )
+      return 0.0;
+    gamma_distribution_t g;
+    g.shape = args.coordinate[0];
+    g.rate = args.coordinate[1];
+    return likelihood( g, gcp );
+  }
+
   gamma_distribution_t
   slice_sample_from( const gamma_conjugate_prior_t& gcp ) 
   {
-    static std::pair<nd_point_t,nd_point_t> support( point( 0.0, 0.0),
-						     point( 1000.0, 1000.0 ) );
+    P2L_COMMON_push_function_context();
+
+    static std::pair<nd_point_t,nd_point_t> support 
+      = std::make_pair( point( 1.0e-4, 1.0e-4 ),
+			point( 1000.0, 1000.0 ) );
     static slice_sampler_workplace_t<nd_point_t> workspace(support);
     boost::function<double(const nd_point_t&)> lik = 
-      [gcp](const nd_point_t& args){ gamma_distribution_t g;
-				     g.shape = args.coordinate[0];
-				     g.rate = args.coordinate[1];
-				     return likelihood( g, gcp ); };
+      boost::bind( temp_lik, _1, gcp );
     nd_point_t params = slice_sample( lik,
 				      workspace,
 				      0.001 );

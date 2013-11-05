@@ -59,12 +59,12 @@ pods_install_headers(
   src/gibbs_sampler.hpp
   DESTINATION
   probability-core )
-pods_use_pkg_config_packages(p2l-probability-core gsl p2l-math-core lcmtypes_p2l-probability-core lcmtypes_p2l-math-core boost-1.54.0)
+pods_use_pkg_config_packages(p2l-probability-core gsl p2l-common p2l-math-core lcmtypes_p2l-probability-core lcmtypes_p2l-math-core boost-1.54.0)
 pods_install_libraries( p2l-probability-core )
 pods_install_pkg_config_file(p2l-probability-core
     CFLAGS
     LIBS -lp2l-probability-core
-    REQUIRES gsl-1.16 p2l-math-core boost-1.54.0
+    REQUIRES gsl-1.16 p2l-common p2l-math-core boost-1.54.0
     VERSION 0.0.1)
 
 

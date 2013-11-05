@@ -16,6 +16,8 @@
 #include <cmath>
 #include <math-core/io.hpp>
 #include <stdexcept>
+#include <p2l-common/stat_counter.hpp>
+#include <p2l-common/context.hpp>
 
 namespace probability_core {
 
@@ -109,7 +111,7 @@ namespace probability_core {
 			     const boost::function0<T_Domain>& uniform_sampler,
 			     rejection_sampler_status_t& status = rejection_sampler_status_t() )
   {
-
+    P2L_COMMON_push_function_context();
     clock_t start_clock = clock();
 
     bool verbose = true;
@@ -153,6 +155,9 @@ namespace probability_core {
 
 	gsl_set_error_handler( old_gsl_error_handler );
 
+	STAT( "status.iterations", status.iterations );
+	STAT( "status.seconds", status.seconds );
+
 	return proposed_sample;
       }
 
@@ -186,6 +191,9 @@ namespace probability_core {
 
 	gsl_set_error_handler( old_gsl_error_handler );
 
+	STAT( "status.iterations", status.iterations );
+	STAT( "status.seconds", status.seconds );
+
 	if( sampled_x.empty() ) {
 	  return uniform_sampler();
 	} else {
@@ -211,6 +219,8 @@ namespace probability_core {
     const boost::function0<T_Domain>& uniform_sampler,
     rejection_sampler_status_t& status = rejection_sampler_status_t() )
   {
+    P2L_COMMON_push_function_context();
+    STAT( "scale", scale );
     return rejection_sample<T_Domain>
       ( boost::function1<double,T_Domain>
 	(boost::lambda::bind( likelihood_function, 
@@ -236,10 +246,19 @@ namespace probability_core {
     const T_Domain& low, const T_Domain& high,
     rejection_sampler_status_t& status = rejection_sampler_status_t() )
   {
-    
+    P2L_COMMON_push_function_context();
+
     // Ok, first we will find the max
     double max_lik_location = math_core::find_max<double,double>( likelihood_function, low, high, low + (high - low) / 2.0 );
     double max_lik = likelihood_function( max_lik_location );
+
+    // make sure max lik is not zero
+    if( max_lik == 0 ) {
+      max_lik = 1.0e-10;
+    }
+
+    STAT( "max_lik.location", max_lik_location );
+    STAT( "max_lik.lik" , max_lik );
 
     // now we create a uniform sampler if we need to
     boost::function0<double> uniform_sampler = uniform_sampler_within_range( (double)low, (double)high );
