@@ -155,8 +155,8 @@ namespace probability_core {
 
 	gsl_set_error_handler( old_gsl_error_handler );
 
-	STAT( "status.iterations", status.iterations );
-	STAT( "status.seconds", status.seconds );
+	STAT_LVL( trace, "status.iterations", status.iterations );
+	STAT_LVL( debug, "status.seconds", status.seconds );
 
 	return proposed_sample;
       }
@@ -191,8 +191,8 @@ namespace probability_core {
 
 	gsl_set_error_handler( old_gsl_error_handler );
 
-	STAT( "status.iterations", status.iterations );
-	STAT( "status.seconds", status.seconds );
+	STAT_LVL( trace, "status.iterations", status.iterations );
+	STAT_LVL( debug, "status.seconds", status.seconds );
 
 	if( sampled_x.empty() ) {
 	  return uniform_sampler();
@@ -220,7 +220,7 @@ namespace probability_core {
     rejection_sampler_status_t& status = rejection_sampler_status_t() )
   {
     P2L_COMMON_push_function_context();
-    STAT( "scale", scale );
+    STAT_LVL( trace, "scale", scale );
     return rejection_sample<T_Domain>
       ( boost::function1<double,T_Domain>
 	(boost::lambda::bind( likelihood_function, 
@@ -257,8 +257,8 @@ namespace probability_core {
       max_lik = 1.0e-10;
     }
 
-    STAT( "max_lik.location", max_lik_location );
-    STAT( "max_lik.lik" , max_lik );
+    STAT_LVL( trace, "max_lik.location", max_lik_location );
+    STAT_LVL( debug, "max_lik.lik" , max_lik );
 
     // now we create a uniform sampler if we need to
     boost::function0<double> uniform_sampler = uniform_sampler_within_range( (double)low, (double)high );

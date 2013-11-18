@@ -44,9 +44,9 @@ namespace probability_core {
     double level_y = sample_from( uniform_distribution<double>( 0.0, max_y ) ); 
 
     //std::cout << "slice_sample | prev_x: " << workplace.previous_x << " max_y: " << max_y << " level: " << level_y << std::endl;
-    STAT( "max_y", max_y );
-    STAT( "level_y", level_y );
-    STAT( "num-level-finds", (double)count_level_finds );
+    STAT_LVL( trace, "max_y", max_y );
+    STAT_LVL( debug, "level_y", level_y );
+    STAT_LVL( trace, "num-level-finds", (double)count_level_finds );
     
     
     // Find the window (the slice)
@@ -143,8 +143,8 @@ namespace probability_core {
     workplace.previous_x = sampled_x;
 
     //std::cout << "Doubling: " << count_window_doubles << "\t Shrinks: " << count_shrinks << std::endl;
-    STAT( "num-doubling", (double)count_window_doubles );
-    STAT( "num-shrinks", (double)count_shrinks );
+    STAT_LVL( trace, "num-doubling", (double)count_window_doubles );
+    STAT_LVL( trace, "num-shrinks", (double)count_shrinks );
     
     // return the sample
     return sampled_x;

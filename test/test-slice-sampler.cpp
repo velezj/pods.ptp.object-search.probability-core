@@ -21,6 +21,7 @@ double func_foo( const double& x )
 
 double func_nd( const nd_point_t& x )
 {
+  assert( x.n == 2 );
   beta_distribution_t true_beta;
   true_beta.alpha = 2.0;
   true_beta.beta = 5.0;
@@ -53,7 +54,7 @@ int main( int argc, char** argv )
 
   std::cout << "First sample: " << slice_sample_1d( func_foo_f, workplace ) << std::endl;
   
-  int num_samples = 10;
+  int num_samples = 100000;
   for( int i = 0; i < num_samples; ++i ) {
     slice_samples.push_back( slice_sample_1d( func_foo_f, workplace ) );
     true_samples.push_back( sample_from( true_beta ) );
@@ -72,7 +73,7 @@ int main( int argc, char** argv )
   
   std::vector<nd_point_t> slice_points;
   std::vector<nd_point_t> true_points;
-  num_samples = 1000000;
+  num_samples = 100000;
   for( int i = 0; i < num_samples; ++i ) {
     slice_points.push_back( slice_sample( func_nd_f, nd_workplace, 0.001 ) );
     true_points.push_back( point( sample_from( true_beta ),
@@ -82,7 +83,7 @@ int main( int argc, char** argv )
   }
   nd_point_t mean_slices = slice_points[0];
   nd_point_t mean_true = true_points[0];
-  for( int i = 0; i < slice_points.size(); ++i ) {
+  for( size_t i = 0; i < slice_points.size(); ++i ) {
     for( int j = 0; j < mean_slices.n; ++j ) {
       mean_slices.coordinate[j] += slice_points[i].coordinate[j];
       mean_true.coordinate[j] += true_points[i].coordinate[j];

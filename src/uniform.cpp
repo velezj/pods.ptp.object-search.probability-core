@@ -23,6 +23,11 @@ namespace probability_core {
     }
     return math_core::point( c );
   }
+
+
+  // explicitly instantiate the tempaltes
+  template double sample_from( const uniform_distribution_t<double>& );
+  template math_core::nd_point_t sample_from( const uniform_distribution_t<math_core::nd_point_t>& );
   
 
 }

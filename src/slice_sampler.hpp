@@ -80,13 +80,13 @@ namespace probability_core {
     slice_t slice = slice_t(workplace.previous_x - w, workplace.previous_x + w);
     slice_t max_slice = slice_t( workplace.support.first, workplace.support.second );
 
-    STAT( "max_y", max_y );
-    STAT( "level_y", level_y );
-    STAT( "previous_x", workplace.previous_x );
-    STAT( "w", w );
-    STAT( "max_slice.low", workplace.support.first );
-    STAT( "max_slice.high", workplace.support.second );
-    STAT( "max_slice.span", (workplace.support.second - workplace.support.first ) );
+    STAT_LVL( trace, "max_y", max_y );
+    STAT_LVL( debug, "level_y", level_y );
+    STAT_LVL( trace, "previous_x", workplace.previous_x );
+    STAT_LVL( trace, "w", w );
+    STAT_LVL( trace, "max_slice.low", workplace.support.first );
+    STAT_LVL( trace, "max_slice.high", workplace.support.second );
+    STAT_LVL( trace, "max_slice.span", (workplace.support.second - workplace.support.first ) );
 
     Range_Type low_level, high_level;
     size_t count_window_doubles = 0;
@@ -127,9 +127,9 @@ namespace probability_core {
     Support_Type sampled_x = sample_from( uniform_distribution( slice_range ) );
     Range_Type sampled_y = f( sampled_x );
 
-    STAT( "slice_range.low", slice.lower() );
-    STAT( "slice_range.high", slice.upper() );
-    STAT( "slice_range.span", (slice.upper() - slice.lower()) );
+    STAT_LVL( trace, "slice_range.low", slice.lower() );
+    STAT_LVL( trace, "slice_range.high", slice.upper() );
+    STAT_LVL( trace, "slice_range.span", (slice.upper() - slice.lower()) );
 
     size_t count_shrinks = 0;
     while( sampled_y < level_y ) {
@@ -158,8 +158,8 @@ namespace probability_core {
 
     //std::cout << "Doubling: " << count_window_doubles << "\t Shrinks: " << count_shrinks << std::endl;
     
-    STAT( "num-doubling", (double)count_window_doubles );
-    STAT( "num-shrinks", (double)count_shrinks );
+    STAT_LVL( debug, "num-doubling", (double)count_window_doubles );
+    STAT_LVL( debug, "num-shrinks", (double)count_shrinks );
     
     // return the sample
     return sampled_x;

@@ -1,11 +1,13 @@
-#if !defined( __PROBABILITY_CORE_uniform_HPP__ )
+#ifndef __PROBABILITY_CORE_uniform_HPP__
 #define __PROBABILITY_CORE_uniform_HPP__
 
 #include <utility>
 #include <boost/random.hpp>
 #include <boost/numeric/interval.hpp>
 #include <math-core/geom.hpp>
-//#include <boost/static_assert.hpp>
+#include <boost/static_assert.hpp>
+#include <stdexcept>
+#include <limits>
 
 namespace probability_core {
 
@@ -63,7 +65,8 @@ namespace probability_core {
   Support_Type
   sample_from( const uniform_distribution_t<Support_Type>& u )
   {
-    //BOOST_STATIC_ASSERT( false, "uniform distribution support type not implemented" );
+    //BOOST_STATIC_ASSERT_MSG( false, "uniform distribution support type not implemented" );
+    throw std::runtime_error("uniform distribution sampling from UNSUPPORTED type");
   }
   
 
@@ -71,18 +74,57 @@ namespace probability_core {
   Support_Type
   mean( const uniform_distribution_t<Support_Type>& u )
   {
-    //BOOST_STATIC_ASSERT( false, "uniform distribution support type not implemented" );
+    //BOOST_STATIC_ASSERT_MSG( false, "uniform distribution support type not implemented" );
+    return std::numeric_limits<Support_Type>::signaling_NaN();
   }
   
   template<class Support_Type>
   double 
   variance( const uniform_distribution_t<Support_Type>& u )
   {
-    //BOOST_STATIC_ASSERT( false, "uniform distribution support type not implemented" );
+    //BOOST_STATIC_ASSERT_MSG( false, "uniform distribution support type not implemented" );
+    return std::numeric_limits<double>::signaling_NaN();
   }
 
 
+
+
+  template<>
+  inline
+  double
+  sample_from( const uniform_distribution_t<double>& u )
+  {
+    static boost::random::mt19937 engine;
+    boost::random::uniform_real_distribution<double> real( u.support.first, u.support.second );
+    return real(engine);
+  }
+  template<>
+  inline
+  math_core::nd_point_t
+  sample_from( const uniform_distribution_t<math_core::nd_point_t>& u )
+  {
+    std::vector<double> c;
+    for( int64_t i = 0; i < u.support.first.n; ++i ) {
+      c.push_back( sample_from( uniform_distribution( u.support.first.coordinate[i],
+						      u.support.second.coordinate[i]) ) );
+    }
+    return math_core::point( c );
+  }
+
+
+  // explicitly instantiate the tempaltes
+  template double sample_from( const uniform_distribution_t<double>& );
+  template math_core::nd_point_t sample_from( const uniform_distribution_t<math_core::nd_point_t>& );
+  
+
+
+
 }
+
+
+
+//------------------------------------------------------------------------------
+
 
 #endif
 

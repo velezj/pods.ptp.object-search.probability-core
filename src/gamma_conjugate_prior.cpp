@@ -141,8 +141,8 @@ namespace probability_core {
     } while( fabs( gsl_monte_vegas_chisq(s) - 1.0 ) > 0.5 &&
 	     num_tries < max_tries);
 
-    STAT( "mc.vegas.tries", (double)num_tries );
-    STAT( "mc.vegas.chisq", gsl_monte_vegas_chisq(s) );
+    STAT_LVL( trace, "mc.vegas.tries", (double)num_tries );
+    STAT_LVL( debug, "mc.vegas.chisq", gsl_monte_vegas_chisq(s) );
 
     // free resources
     gsl_monte_vegas_free( s );
