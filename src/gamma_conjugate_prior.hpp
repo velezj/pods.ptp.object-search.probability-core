@@ -2,6 +2,7 @@
 #define __PROBABILITY_CORE_GAMMA_CONJUGATE_PRIOR_HPP__
 
 #include "lcmtypes/p2l_probability_core.hpp"
+#include <math-core/mpt.hpp>
 
 namespace probability_core {
 
@@ -47,6 +48,19 @@ namespace probability_core {
   gamma_conjugate_prior_t
   fix_numerical_reduce_counts( const gamma_conjugate_prior_t& gcp );
 
+
+
+  // Description:
+  // Some "true" alsogirmths for testing
+  namespace testing_true {
+
+    // the likelihood
+    math_core::mpt::mp_float 
+    likelihood( const gamma_distribution_t& gamma, 
+		const gamma_conjugate_prior_t& gcp );
+    
+    
+  }
 
 }
 

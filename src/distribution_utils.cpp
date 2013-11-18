@@ -419,7 +419,7 @@ namespace probability_core {
     std::ostringstream oss;
     oss << "{ \"object_class\" : \"gaussian_distribution_t\" , ";
     oss << "  \"mean\" : [ ";
-    for( size_t i = 0; i < gauss.dimension; ++i ) {
+    for( int i = 0; i < gauss.dimension; ++i ) {
       oss << gauss.means[0];
       if( i < gauss.dimension - 1 ) {
 	oss << ",";

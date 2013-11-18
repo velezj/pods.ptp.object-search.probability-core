@@ -42,7 +42,7 @@ int main( int argn, char** argv )
   }
 
   // sample using slice sampler
-  for( size_t i = 0; i < num_gamma_samples; ++i ) {
+  for( int i = 0; i < num_gamma_samples; ++i ) {
     gamma_distribution_t gamma = slice_sample_from( gcp );
     std::cout << "slice sampled: " << gamma << "  lik(.)=" << likelihood( gamma, gcp ) << std::endl;
   }
