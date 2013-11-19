@@ -230,7 +230,7 @@ namespace test_functions {
     g.rate = gx.coordinate[1];
 
     gamma_conjugate_prior_t gcp;
-    gcp.p = gcp.q = gcp.r = gcp.s = 1.0;
+    gcp.p = gcp.q = gcp.r = gcp.s = 1;
     
     return testing_true::likelihood( g, gcp ).convert_to<double>();
   }
@@ -243,7 +243,7 @@ namespace test_functions {
     g.rate = gx.coordinate[1];
 
     gamma_conjugate_prior_t gcp;
-    gcp.p = gcp.q = gcp.r = gcp.s = 1.0;
+    gcp.p = gcp.q = gcp.r = gcp.s = 1;
     
     return likelihood( g, gcp );
   }
@@ -278,7 +278,8 @@ BOOST_AUTO_TEST_SUITE( gcp_sampling )
 BOOST_FIXTURE_TEST_CASE( gcp_slice_sampler, fixture_common_gcp )
 {
   
-  int max_samples = 1000;
+  int max_samples = 100;
+  int skip_slice_samples = 10000;
   
   std::vector<nd_point_t> slice_samples_100;
   std::vector<nd_point_t> reject_samples_100;
@@ -298,6 +299,10 @@ BOOST_FIXTURE_TEST_CASE( gcp_slice_sampler, fixture_common_gcp )
     BOOST_WARN_LT( rejection_sampler_status.seconds, 0.01 );
     BOOST_CHECK_LT( rejection_sampler_status.seconds, 1.0 );
 
+
+    for( int i = 0; i < skip_slice_samples; ++i ) {
+      slice_sample_from( gcp_1_1_1_1 );
+    }
     gamma_distribution_t s_g_sample =
       slice_sample_from( gcp_1_1_1_1 );
     nd_point_t s_sample = point( s_g_sample.shape,
@@ -310,6 +315,7 @@ BOOST_FIXTURE_TEST_CASE( gcp_slice_sampler, fixture_common_gcp )
     slice_samples_1000.push_back( s_sample );
     reject_samples_1000.push_back( r_sample );
 
+    std::cout << "sample [" << n << "] done." << std::endl;
   }
 
 
@@ -332,12 +338,12 @@ BOOST_FIXTURE_TEST_CASE( gcp_slice_sampler, fixture_common_gcp )
   for( nd_point_t x : slice_samples_1000 ) {
     sum = sum + ( x - point( 0.0, 0.0 ) );
   }
-  slice_mean_1000 = point(0.0,0.0) + ( ( sum - point(0.0,0.0) ) * (1.0/1000) );
+  slice_mean_1000 = point(0.0,0.0) + ( ( sum - point(0.0,0.0) ) * (1.0/max_samples) );
   sum = point(0.0,0.0);
   for( nd_point_t x : reject_samples_1000 ) {
     sum = sum + ( x - point( 0.0, 0.0 ) );
   }
-  reject_mean_1000 = point(0.0,0.0) + ( ( sum - point(0.0,0.0) ) * (1.0/1000) );
+  reject_mean_1000 = point(0.0,0.0) + ( ( sum - point(0.0,0.0) ) * (1.0/max_samples) );
 
   
 

@@ -255,7 +255,7 @@ namespace probability_core {
     gamma_distribution_t g;
     g.shape = args.coordinate[0];
     g.rate = args.coordinate[1];
-    return likelihood( g, gcp );
+    return testing_true::likelihood( g, gcp ).convert_to<double>();
   }
 
   gamma_distribution_t
@@ -264,14 +264,14 @@ namespace probability_core {
     P2L_COMMON_push_function_context();
 
     static std::pair<nd_point_t,nd_point_t> support 
-      = std::make_pair( point( 1.0e-4, 1.0e-4 ),
-			point( 1000.0, 1000.0 ) );
+      = std::make_pair( point( 1.0e-5, 1.0e-5 ),
+			point( 1.0e5, 1.0e5 ) );
     static slice_sampler_workplace_t<nd_point_t> workspace(support);
     boost::function<double(const nd_point_t&)> lik = 
       boost::bind( temp_lik, _1, gcp );
     nd_point_t params = slice_sample( lik,
 				      workspace,
-				      0.001 );
+				      1.0e-10 /* 0.001 */ );
     gamma_distribution_t gamma;
     gamma.shape = params.coordinate[0];
     gamma.rate = params.coordinate[1];
