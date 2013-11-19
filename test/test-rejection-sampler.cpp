@@ -33,10 +33,11 @@ int main()
   uniform_sampler_within_range uniform( 0, 1000 );
   
   rejection_sampler_status_t rstatus;
+  autoscaled_rejection_sampler_status_t as_status;
   for( std::size_t i = 0; i < 1000000; ++i ) {
     samples.push_back( sample_from( gamma ) );
     rejection_samples.push_back( rejection_sample<double>( pdf, uniform, rstatus ) );
-    as_samples.push_back( autoscale_rejection_sample<double>( boost::function1<double,double>(pdf), 0.0, 1000.0, rstatus ) );
+    as_samples.push_back( autoscale_rejection_sample<double>( boost::function1<double,double>(pdf), 0.0, 1000.0, as_status ) );
     if( i % 10000 == 0 ) {
       std::cout << "sampled: " << samples[ samples.size()-1 ] << "  " << rejection_samples[ rejection_samples.size() - 1 ] << "  " << as_samples[ as_samples.size() -1 ]<< std::endl;
     }

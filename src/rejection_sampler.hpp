@@ -100,6 +100,20 @@ namespace probability_core {
     {}
   };
 
+  // Description:
+  // The status for the autoscaled rejection sampler.
+  // This just adds a scale found field (and location)
+  struct autoscaled_rejection_sampler_status_t 
+    : rejection_sampler_status_t
+  {
+    double scale;
+    double mode_location;
+    autoscaled_rejection_sampler_status_t()
+      : scale(std::numeric_limits<double>::quiet_NaN()),
+	mode_location(std::numeric_limits<double>::quiet_NaN())
+    {}
+  };
+
 
   // Description:
   // A rejection sampler wich just takes in a distribution
@@ -244,7 +258,7 @@ namespace probability_core {
   autoscale_rejection_sample
   ( const boost::function1<double, const T_Domain&>& likelihood_function,
     const T_Domain& low, const T_Domain& high,
-    rejection_sampler_status_t& status = rejection_sampler_status_t() )
+    autoscaled_rejection_sampler_status_t& status = autoscaled_rejection_sampler_status_t() )
   {
     P2L_COMMON_push_function_context();
 
@@ -257,6 +271,9 @@ namespace probability_core {
       max_lik = 1.0e-10;
     }
 
+    status.scale = max_lik;
+    status.mode_location = max_lik_location;
+
     STAT_LVL( trace, "max_lik.location", max_lik_location );
     STAT_LVL( debug, "max_lik.lik" , max_lik );
 
@@ -264,9 +281,14 @@ namespace probability_core {
     boost::function0<double> uniform_sampler = uniform_sampler_within_range( (double)low, (double)high );
 
     // rescale the lieklihood and then rejection sample
-    return 
+    rejection_sampler_status_t rstatus;
+    double sample = 
       scaled_rejection_sample<double>
-      ( likelihood_function, max_lik, uniform_sampler, status );
+      ( likelihood_function, max_lik, uniform_sampler, 
+	rstatus );
+    status.iterations = rstatus.iterations;
+    status.seconds = rstatus.seconds;
+    return sample;
   }
 
 }

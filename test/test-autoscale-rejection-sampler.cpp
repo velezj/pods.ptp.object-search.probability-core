@@ -476,7 +476,8 @@ BOOST_FIXTURE_TEST_CASE( autoscaled_rejection_sampler_test_100,
   size_t num_samples = 10000;
   for( size_t n = 0; n < num_samples; ++n ) {
 
-    rejection_sampler_status_t scaled_status, autoscaled_status;
+    rejection_sampler_status_t scaled_status;
+    autoscaled_rejection_sampler_status_t autoscaled_status;
     double s_sample = scaled_rejection_sample<double>( lik, 110.0, uni_f, scaled_status );
     double as_sample = autoscale_rejection_sample<double>( lik, low, high, autoscaled_status );
 
@@ -486,6 +487,9 @@ BOOST_FIXTURE_TEST_CASE( autoscaled_rejection_sampler_test_100,
     autoscaled_iters.push_back( autoscaled_status.iterations );
     scaled_total_seconds += scaled_status.seconds;
     autoscaled_total_seconds += autoscaled_status.seconds;
+
+    BOOST_CHECK_LE( autoscaled_status.scale, 100.0 );
+    BOOST_CHECK_CLOSE( autoscaled_status.scale, 100.0, 1.0 );
   }
 
   // make sure means are close, and variances
