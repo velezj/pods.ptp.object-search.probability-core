@@ -79,3 +79,10 @@ add_executable( probability-core-test-autoscale-rejection-sampler
 pods_use_pkg_config_packages( probability-core-test-autoscale-rejection-sampler
   boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
 pods_install_executables( probability-core-test-autoscale-rejection-sampler )
+
+
+add_executable( probability-core-test-bumps
+  test-bumps.cpp )
+pods_use_pkg_config_packages( probability-core-test-bumps
+  boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
+pods_install_executables( probability-core-test-bumps )
