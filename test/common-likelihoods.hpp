@@ -55,25 +55,28 @@ struct bumpy_likelihood_known_mode_t
     this->bumps = bumps;
     this->mode_likelihood = mode_lik;
     low_support = 1.0;
-    high_supprt = 20.0;
+    high_supprt = 40.0;
     double low = low_support;
     double high = high_supprt;
 
     // place non-mode bumps
     for( size_t i = 0; i < bumps - 1; ++i ) {
-      double loc = ( high - low ) * ( ( (double)i + 0.5) / (bumps) ) + low_support;
+      double loc = ( ( high - low ) / 2.0 ) * ( ( (double)(2*i) ) / (2*bumps) ) + low_support;
       gamma_distribution_t g;
-      g.rate = ( bumps - 0.5 );
+      g.rate = ( bumps + 2.0 );
+      //g.rate = 2.0 * ( high - low ) / bumps;
       g.shape = loc * g.rate + 1;
       gammas.push_back( g );
     }
     
     // create the mode gamma
     gamma_distribution_t g;
-    g.rate = bumps + 4.0;
-    g.shape = ( high - low ) / 2.0 * g.rate + 1.0;
+    g.rate = (bumps + 2.0);
+    g.shape = 11.0 * ( high - low ) / 17.0 * g.rate + 1.0;
     gammas.push_back( g );
-    mode = ( g.shape - 1.0 ) / g.rate + low_support;
+
+    
+    mode = ( gammas[0].shape - 1.0 ) / gammas[0].rate + low_support;
 
     // get teh scaling for hte mode
     double sum = 0;
@@ -82,6 +85,14 @@ struct bumpy_likelihood_known_mode_t
       sum += pdf( x_norm, g );
     }
     scaling = mode_likelihood / sum;
+
+    // print out the modes
+    // std::cout << "bumpy_lik()" << std::endl;
+    // for( auto g : gammas ) {
+    //   std::cout << "  mode = " << ( g.shape - 1.0 ) / g.rate 
+    // 		<< " var = " << ( g.shape ) / ( g.rate * g.rate ) 
+    // 		<< std::endl;
+    // }
   }
   
   double operator() ( const double& x )

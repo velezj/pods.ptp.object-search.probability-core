@@ -89,14 +89,17 @@ BOOST_AUTO_TEST_CASE( find_bumps_test_1 )
   size_t modes = 3;
   bumpy_likelihood_known_mode_t lik( modes, 1.0 );
   boost::function1<double,double> lik_f = lik;
-boost::function3<std::vector<double>,double,double,std::pair<double,double> > neigh_f = neighborhood::uniform_radius<double>();
+  boost::function3<std::vector<double>,double,double,std::pair<double,double> > neigh_f = neighborhood::uniform_radius<double>();
   uniform_distribution_t<double> u = uniform_distribution( lik.low_support,
 							   lik.high_supprt );
   boost::function0<double> start_loc = [u]() { return sample_from(u); };
+  boost::function2<double,double,double> distance_f = [](const double&a,
+							 const double&b)
+    { return fabs(a-b); };
 
   // since it only has a single mode, try to find the single bump
   double max_step = 1.0;
-  double min_step = 1e-10;
+  double min_step = 1e-4;
   size_t max_iter = 1e5;
   size_t num_restarts = 1e5;
   std::vector<find_bump_status_t<double,double> > status;
@@ -110,12 +113,54 @@ boost::function3<std::vector<double>,double,double,std::pair<double,double> > ne
       neigh_f,
       max_iter,
       start_loc,
+      distance_f,
       status );
   
   BOOST_CHECK_EQUAL( bumps.size(), modes );
-  
 }
 
+//========================================================================
+
+BOOST_AUTO_TEST_CASE( find_bumps_test_100 )
+{
+  size_t modes = 7;
+  bumpy_likelihood_known_mode_t lik( modes, 100.0 );
+  boost::function1<double,double> lik_f = lik;
+  boost::function3<std::vector<double>,double,double,std::pair<double,double> > neigh_f = neighborhood::uniform_radius<double>();
+  uniform_distribution_t<double> u = uniform_distribution( lik.low_support,
+							   lik.high_supprt );
+  boost::function0<double> start_loc = [u]() { return sample_from(u); };
+  boost::function2<double,double,double> distance_f = [](const double&a,
+							 const double&b)
+    { return fabs(a-b); };
+
+  // since it only has a single mode, try to find the single bump
+  double max_step = 1.0;
+  double min_step = 1e-4;
+  size_t max_iter = 1e5;
+  size_t num_restarts = modes * 100;
+  std::vector<find_bump_status_t<double,double> > status;
+  std::vector<double> bumps =
+    find_bumps_using_restarts
+    ( lik_f,
+      std::make_pair( lik.low_support, lik.high_supprt ),
+      num_restarts,
+      max_step,
+      min_step,
+      neigh_f,
+      max_iter,
+      start_loc,
+      distance_f,
+      status );
+  
+  BOOST_CHECK_EQUAL( bumps.size(), modes );
+
+  // std::cout << "lik = [";
+  // for( double x = lik.low_support; x < lik.high_supprt; x = x + 0.001 * (lik.high_supprt - lik.low_support ) ) {
+  //   std::cout << lik(x) << ",";
+  // }
+  // std::cout << "];" << std::endl;
+}
 
 //========================================================================
 

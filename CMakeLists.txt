@@ -57,6 +57,7 @@ pods_install_headers(
   src/slice_sampler.hpp
   src/gibbs_sampler.hpp
   src/bumps.hpp
+  src/autocorrelation.hpp
   DESTINATION
   probability-core )
 pods_use_pkg_config_packages(p2l-probability-core gsl p2l-common p2l-math-core lcmtypes_p2l-probability-core lcmtypes_p2l-math-core boost-1.54.0 boost-1.54.0-system)

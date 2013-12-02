@@ -263,9 +263,12 @@ namespace probability_core {
   {
     P2L_COMMON_push_function_context();
 
+    // static std::pair<nd_point_t,nd_point_t> support 
+    //   = std::make_pair( point( 1.0e-5, 1.0e-5 ),
+    // 			point( 1.0e5, 1.0e5 ) );
     static std::pair<nd_point_t,nd_point_t> support 
-      = std::make_pair( point( 1.0e-5, 1.0e-5 ),
-			point( 1.0e5, 1.0e5 ) );
+      = std::make_pair( point( 1.0e-2, 1.0e-2 ),
+			point( 1.0e2, 1.0e2 ) );
     static slice_sampler_workplace_t<nd_point_t> workspace(support);
     boost::function<double(const nd_point_t&)> lik = 
       boost::bind( temp_lik, _1, gcp );

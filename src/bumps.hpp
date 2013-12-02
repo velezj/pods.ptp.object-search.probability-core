@@ -178,17 +178,22 @@ namespace probability_core {
     const boost::function3<std::vector<T_Domain>,T_Domain,T_Dist,T_Support>& neighborhood_f,
     const size_t& max_single_restart_iterations,
     const boost::function0<T_Domain>& start_location_sampler,
+    const boost::function2<T_Dist,T_Domain,T_Domain>& domain_distance_f,
     std::vector<find_bump_status_t<T_Domain,T> >& status )
   {
     std::vector<T_Domain> bumps;
+
+    // std::streamsize org_prec = std::cout.precision();
+    // std::cout.precision( 20 );
+    // std::cout << "find_bumps_using_restarts(): min_step_size=" << min_step_size << std::endl;
     
     // This function is pretty simple, just
     // sample a new start location and call find_single_bump.
     for( size_t i = 0; i < num_restarts; ++i ) {
       
-      find_bump_status_t single_status;
+      find_bump_status_t<T_Domain,T> single_status;
       T_Domain start = start_location_sampler();
-      t_Domain bump 
+      T_Domain bump 
 	= find_single_bump<T_Domain, T, T_Dist, T_Support >
 	( f,
 	  start,
@@ -198,11 +203,33 @@ namespace probability_core {
 	  neighborhood_f,
 	  max_single_restart_iterations,
 	  single_status );
-      
-      status.push_back( single_status );
-      bumps.push_back( bump );
+
+      // std::cout << "  found bump: " << bump << " ";
+
+
+      // we need to chekc if the found bump is within 2*min_step_size
+      // of any other previsouly found bump, in which case we decide it
+      // is *the same* bump and do not store a second copy in the resulting
+      // vector of bumps
+      auto same_bump_predicate =
+	[bump,domain_distance_f,min_step_size](const T_Domain& x ) 
+	{
+	  return domain_distance_f( x, bump ) <= 2.0 * min_step_size;
+	};
+      if( std::none_of( bumps.begin(), bumps.end(), same_bump_predicate ) ) {
+
+	// a new bump was found, store it and it's trace
+	status.push_back( single_status );
+	bumps.push_back( bump );
+
+	// std::cout << " [stored]!";
+      }
+
+      // std::cout << std::endl;
     }
     
+    // std::cout.precision( org_prec );
+
     return bumps;
   }
 

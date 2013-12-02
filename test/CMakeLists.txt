@@ -86,3 +86,10 @@ add_executable( probability-core-test-bumps
 pods_use_pkg_config_packages( probability-core-test-bumps
   boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
 pods_install_executables( probability-core-test-bumps )
+
+
+add_executable( probability-core-test-slice-sampler-ac
+  test-slice-sampler-ac.cpp )
+pods_use_pkg_config_packages( probability-core-test-slice-sampler-ac
+  boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
+pods_install_executables( probability-core-test-slice-sampler-ac )
