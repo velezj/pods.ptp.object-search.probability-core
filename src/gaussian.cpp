@@ -114,6 +114,12 @@ namespace probability_core {
     return point( gaussian.means );
   }
 
+  nd_point_t
+  mode( const gaussian_distribution_t& gaussian )
+  {
+    return mean( gaussian );
+  }
+
   dense_matrix_t
   covariance( const gaussian_distribution_t& gaussian )
   {

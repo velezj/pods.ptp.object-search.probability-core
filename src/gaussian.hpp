@@ -23,6 +23,9 @@ namespace probability_core {
 
   nd_point_t
   mean( const gaussian_distribution_t& d );
+
+  nd_point_t
+  mode( const gaussian_distribution_t& d );
   
   dense_matrix_t 
   covariance( const gaussian_distribution_t& d );

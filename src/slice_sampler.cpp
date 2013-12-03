@@ -36,7 +36,7 @@ namespace probability_core {
     int count_level_finds = 0;
     int max_level_finds = 10000;
     while( max_y == 0 && count_level_finds < max_level_finds ) {
-      std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
+      //std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
       workplace.reset();
       max_y = f( workplace.previous_x );
       ++count_level_finds;

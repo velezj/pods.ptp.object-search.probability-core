@@ -22,6 +22,8 @@ namespace probability_core {
   double 
   variance( const gamma_distribution_t& d );
 
+  double
+  mode( const gamma_distribution_t& d );
 
 }
 
