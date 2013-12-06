@@ -267,14 +267,23 @@ namespace probability_core {
     //   = std::make_pair( point( 1.0e-5, 1.0e-5 ),
     // 			point( 1.0e5, 1.0e5 ) );
     static std::pair<nd_point_t,nd_point_t> support 
-      = std::make_pair( point( 1.0e-2, 1.0e-2 ),
-			point( 1.0e2, 1.0e2 ) );
+      = std::make_pair( point( 1.0e-2, 1.0e-3 ),
+			point( 1.0e2, 1.0e3 ) );
     static slice_sampler_workplace_t<nd_point_t> workspace(support);
-    boost::function<double(const nd_point_t&)> lik = 
-      boost::bind( temp_lik, _1, gcp );
-    nd_point_t params = slice_sample( lik,
-				      workspace,
-				      1.0e-10 /* 0.001 */ );
+    static size_t skip_sampling_counter = 0;
+    if( skip_sampling_counter > 1 )
+      skip_sampling_counter = 0;
+    ++skip_sampling_counter;
+    nd_point_t params;
+    if( skip_sampling_counter == 1 ) {
+      boost::function<double(const nd_point_t&)> lik = 
+	boost::bind( temp_lik, _1, gcp );
+      params = slice_sample( lik,
+			     workspace,
+			     1.0e-7 /* 0.001 */ );
+    } else {
+      params = workspace.previous_x;
+    }
     gamma_distribution_t gamma;
     gamma.shape = params.coordinate[0];
     gamma.rate = params.coordinate[1];

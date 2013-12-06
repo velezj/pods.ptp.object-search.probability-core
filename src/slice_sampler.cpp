@@ -34,12 +34,16 @@ namespace probability_core {
     double max_y = f( workplace.previous_x );
 
     int count_level_finds = 0;
-    int max_level_finds = 10000;
-    while( max_y == 0 && count_level_finds < max_level_finds ) {
-      //std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
+    while( max_y == 0 ) {
+      if( (count_level_finds + 1) % 1000 == 0 ) {
+	std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
+      }
       workplace.reset();
       max_y = f( workplace.previous_x );
       ++count_level_finds;
+    }
+    if( count_level_finds > 0 ) {
+      //std::cout << "final slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
     }
     double level_y = sample_from( uniform_distribution<double>( 0.0, max_y ) ); 
 

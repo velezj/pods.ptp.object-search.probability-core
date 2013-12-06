@@ -102,7 +102,7 @@ namespace probability_core {
 
   gamma_distribution_t sample_gamma_from( const gamma_conjugate_prior_t& gamma_distribution )
   {
-    return sample_from( gamma_distribution );
+    return slice_sample_from( gamma_distribution );
   }
 
   //=======================================================================
