@@ -3,6 +3,8 @@
 
 #include "lcmtypes/p2l_probability_core.hpp"
 #include <math-core/mpt.hpp>
+#include <math-core/geom.hpp>
+//#include "slice_sampler.hpp"
 
 namespace probability_core {
 
@@ -23,6 +25,15 @@ namespace probability_core {
 
   gamma_distribution_t
   slice_sample_from( const gamma_conjugate_prior_t& gcp );
+
+  template<class Support_Type>
+  class slice_sampler_workplace_t;
+
+  gamma_distribution_t
+  slice_sample_from
+  ( const gamma_conjugate_prior_t& gcp,
+    slice_sampler_workplace_t<math_core::nd_point_t>& workspace);
+
 
   //double
   //mean( const gamma_conjugate_prior_t& gcp );

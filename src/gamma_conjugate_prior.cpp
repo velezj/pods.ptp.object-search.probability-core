@@ -270,20 +270,20 @@ namespace probability_core {
       = std::make_pair( point( 1.0e-2, 1.0e-3 ),
 			point( 1.0e2, 1.0e3 ) );
     static slice_sampler_workplace_t<nd_point_t> workspace(support);
-    static size_t skip_sampling_counter = 0;
-    if( skip_sampling_counter > 1 )
-      skip_sampling_counter = 0;
-    ++skip_sampling_counter;
+    return slice_sample_from( gcp,
+			      workspace );
+  }
+
+  gamma_distribution_t
+  slice_sample_from( const gamma_conjugate_prior_t& gcp,
+		     slice_sampler_workplace_t<nd_point_t>& workspace )
+  {
     nd_point_t params;
-    if( skip_sampling_counter == 1 ) {
-      boost::function<double(const nd_point_t&)> lik = 
-	boost::bind( temp_lik, _1, gcp );
-      params = slice_sample( lik,
-			     workspace,
-			     1.0e-7 /* 0.001 */ );
-    } else {
-      params = workspace.previous_x;
-    }
+    boost::function<double(const nd_point_t&)> lik = 
+      boost::bind( temp_lik, _1, gcp );
+    params = slice_sample( lik,
+			   workspace,
+			   1.0e-7 /* 0.001 */ );
     gamma_distribution_t gamma;
     gamma.shape = params.coordinate[0];
     gamma.rate = params.coordinate[1];
