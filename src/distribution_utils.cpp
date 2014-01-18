@@ -85,6 +85,18 @@ namespace probability_core {
       cov = 1.0 / 1e-10; 
     }
     gauss.covariance = to_dense_mat( Eigen::MatrixXd::Identity( mean.n, mean.n ) * cov );
+    
+    for( size_t i = 0; i < gauss.dimension; ++i ) {
+      if( std::isnan( gauss.means[i] ) ) {
+	std::cout << "!NaN in sampled gaiussian mean!" << std::endl;
+      }
+    }
+    for( size_t i = 0; i < gauss.covariance.num_elements; ++i ) {
+      if( std::isnan( gauss.covariance.data[i] ) ) {
+	std::cout << "!NaN in sampled gaiussian covariance!" << std::endl;
+      }
+    }
+
     return gauss;
   }
 

@@ -3,10 +3,13 @@
 #include "core.hpp"
 #include <math-core/matrix.hpp>
 #include <math-core/geom.hpp>
+#include <math-core/io.hpp>
 #include <stdexcept>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 #include "toms462.hpp"
+#include <cmath>
+#include <iostream>
 
 
 
@@ -31,6 +34,19 @@ namespace probability_core {
     double norm_t0 = pow( 2.0 * M_PI, - (double)n / 2.0 );
     double norm_t1 = ( 1.0 / sqrt( cov.determinant() ) );
     double norm = norm_t0 * norm_t1;
+    if( std::isnan(norm) ) {
+      std::cout << "NaN gaussian pdf: " 
+		<< n << ", " 
+		<< cov << ", " 
+		<< mean << ", " 
+		<< mean_diff << ", " 
+		<< temp << ", " 
+		<< exponent << ", " 
+		<< norm_t0 << ", " 
+		<< norm_t1 << ", " 
+		<< norm << std::endl;
+      norm = 0.0;
+    }
     return norm * exp( exponent );
   }
 

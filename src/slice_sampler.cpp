@@ -37,6 +37,21 @@ namespace probability_core {
     while( max_y == 0 ) {
       if( (count_level_finds + 1) % 1000 == 0 ) {
 	std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
+	
+	// let's make sure we have at least one
+	// non-zero in support
+	int count = 0;
+	for( nd_point_t x = workplace.support.first;
+	     point_lexicographical_compare( x, workplace.support.second);
+	     x = x + 0.00001 * ( workplace.support.second - workplace.support.first ) ) {
+	  
+	  double p = f( x );
+	  if( p > 0 ) {
+	    count++;
+	  }
+	}
+	std::cout << "  -- nonzero's = " << count << std::endl;
+	  
       }
       workplace.reset();
       max_y = f( workplace.previous_x );
