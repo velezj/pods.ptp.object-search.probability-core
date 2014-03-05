@@ -17,6 +17,20 @@ namespace probability_core {
   struct GEM_stopping_criteria_t
   {
     boost::optional<size_t> max_iterations;
+
+    GEM_stopping_criteria_t() : max_iterations(100) {}
+  };
+
+  //====================================================================
+
+  // Description:
+  // Parameters for the GEM algorothm, including stopping criteria
+  struct GEM_parameters_t
+  {
+    GEM_stopping_criteria_t stop;
+    size_t max_optimize_iterations;
+
+    GEM_parameters_t() : stop(), max_optimize_iterations(100) {}
   };
 
   //====================================================================
@@ -30,12 +44,13 @@ namespace probability_core {
   // we assume that we have a hidden variable per data which denotes which
   // mixture the data comes from.
   void run_GEM_mixture_model_MLE_numerical
-  ( const GEM_stopping_criteria_t& stop,
+  ( const GEM_parameters_t& gem_parameters,
     const std::vector<math_core::nd_point_t>& data,
     const std::vector<std::vector<double> >& initial_parameters,
     std::function<double(const math_core::nd_point_t& single_data,
 			 const std::vector<double>& params)>& model_likelihood,
-    std::vector<std::vector<double> >& mle_estimate );
+    std::vector<std::vector<double> >& mle_estimate,
+    std::vector<double>& mle_mixture_weights );
 
   //====================================================================
   //====================================================================

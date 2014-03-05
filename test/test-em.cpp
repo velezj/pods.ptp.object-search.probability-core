@@ -30,8 +30,7 @@ double test_lik_gaus( const nd_point_t& x,
   if( sigma < 0.2 )
     return 1.0e-10;
   return gsl_ran_gaussian_pdf( x.coordinate[0] - params[0],
-			       sigma ) 
-    * gsl_ran_gaussian_pdf( params[0], 1.0 );
+			       sigma );
 }
 
 int main( int argc, char** argv )
@@ -49,18 +48,21 @@ int main( int argc, char** argv )
       { 0.5, 0.1 } };
 
   std::vector<std::vector<double> > mle_params;
-  
-  GEM_stopping_criteria_t stop;
-  stop.max_iterations = 10000;
+  std::vector<double> mle_mixtures;
+
+  GEM_parameters_t gem_params;
+  gem_params.max_optimize_iterations = 10;
+  gem_params.stop.max_iterations = 10;
   
   std::function< double(const math_core::nd_point_t& single_data,
 			const std::vector<double>& params) > 
     test_lik_f = &test_lik_gaus;
-  run_GEM_mixture_model_MLE_numerical( stop,
+  run_GEM_mixture_model_MLE_numerical( gem_params,
 				       data,
 				       init_params,
 				       test_lik_f,
-				       mle_params);
+				       mle_params,
+				       mle_mixtures);
  
   // beta_distribution_t beta0, beta1;
   // beta0.alpha = mle_params[0][0];
@@ -82,6 +84,12 @@ int main( int argc, char** argv )
       std::cout << mle_params[i][j] << " , ";
     }
     std::cout << std::endl;
+    std::cout << "        ";
+  }
+  std::cout << std::endl;
+  std::cout << "   Mix: ";
+  for( size_t i = 0; i < mle_mixtures.size(); ++i ) {
+    std::cout << mle_mixtures[i] << " , ";
   }
   std::cout << std::endl;
 }

@@ -3,6 +3,7 @@
 #include <gsl/gsl_multimin.h>
 #include "uniform.hpp"
 #include <math-core/gsl_utils.hpp>
+#include <math-core/matrix.hpp>
 #include <iostream>
 
 namespace probability_core {
@@ -163,11 +164,23 @@ namespace probability_core {
 	lik(lik)
     {}
 
-    double operator() (const std::vector<double>& flat_params ) const
+
+    // Descripiton:
+    // This computes the Q( b | b^t ), the expectation of the
+    // log function conditioned on the previous parameters b^t
+    // as well as the hidden variables z (the mixture weights)
+    // Note: we take in only the non-hidden parameters as input because
+    //       the mixture weights are given to this upon creation
+    //       *and* when we maximize this Q we can maximize the 
+    //       hidden poarts *separately (and in lcosed form!) from the
+    //       arbritary given parameters~!
+    double operator() 
+    (const std::vector<double>& flat_params ) const
     {
       // reconstruct the parameter structure
       std::vector<std::vector<double > > params =
-	reconstitute_parameters( model_parameters, flat_params.data() );
+	reconstitute_parameters( model_parameters, 
+				 flat_params.data() );
 
       // ok, now lets compute the expectation of the data
       // given the model parameter inputs as well as the
@@ -240,6 +253,11 @@ namespace probability_core {
 
   //====================================================================
 
+  // Descripiton:
+  // Finds the maximum parameter setting of all *non-hidden* variables!
+  // This means we don NOT maximize over mixture weights,
+  // that should be done (and can be done!) seperately from the 
+  // given parameters.
   std::vector<double>
   find_max_Q_numeric( const _GEM_mixture_Q_t& q,
 		      const std::vector<double> flat_params,
@@ -317,14 +335,65 @@ namespace probability_core {
 
   //====================================================================
 
+  std::vector<double>
+  maximize_mixture_weights
+  ( const std::vector<math_core::nd_point_t>& data,
+    const std::vector<double>& mixture_parameters,
+    const std::vector<std::vector< double > >& model_parameters,
+    std::function<double(const math_core::nd_point_t& single_data,
+			 const std::vector<double>& params)>& lik )
+  {
+
+    // closed form solution see wikipedia, gaussian mixture example
+    // http://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm
+
+
+    Eigen::MatrixXd T( mixture_parameters.size(),
+		       data.size() );
+    for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+      for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	math_core::nd_point_t x = data[ data_i ];
+	double t = mixture_parameters[ mix_i ];
+	std::vector<double> params = model_parameters[ mix_i ];
+	double w = t * lik( x, params );
+	double norm_w = 0;
+	for( size_t mix_j = 0; mix_j < mixture_parameters.size(); ++mix_j ) {
+	  norm_w += ( mixture_parameters[mix_j] 
+		      * lik( x, model_parameters[mix_j]) );
+	}
+	T( mix_i, data_i ) = w / norm_w;
+      }
+    }
+
+    // Ok, compute maximum new mixture weights given T
+    std::vector<double> new_mixture_weights( mixture_parameters.size(), 0.0 );
+    for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+      double w = 0;
+      for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	w += T( mix_i, data_i );
+      }
+      new_mixture_weights[ mix_i ] = w / data.size();
+    }
+    
+    return new_mixture_weights;
+  }
+
+  //====================================================================
+
   void run_GEM_mixture_model_MLE_numerical
-  ( const GEM_stopping_criteria_t& stop,
+  ( const GEM_parameters_t& gem_parameters,
     const std::vector<math_core::nd_point_t>& data,
     const std::vector<std::vector<double> >& initial_parameters,
     std::function<double(const math_core::nd_point_t& single_data,
 			 const std::vector<double>& params)>& model_likelihood,
-    std::vector<std::vector<double> >& mle_estimate )
+    std::vector<std::vector<double> >& mle_estimate,
+    std::vector<double>& mle_mixture_weights )
   {
+
+    // we want to ignore most "math" errros from gsl here,
+    // and just try to keep on iterating!
+    math_core::gsl_scoped_error_function_t
+      local_gsl_error_handler( math_core::gsl_ignore_math_caveat_errors );
 
     // ok, we need to store an keep up the hidden set of 
     // "weights" for each mixture
@@ -339,7 +408,7 @@ namespace probability_core {
     
     // loop doing E then M steps
     size_t iteration = 0;
-    while( iteration < *stop.max_iterations ) {
+    while( iteration < *gem_parameters.stop.max_iterations ) {
     
       // Expectation step (E-step) which really is the conditional
       // expectation given the prameters for the mixture weights (hidden)
@@ -352,14 +421,26 @@ namespace probability_core {
       // Ok, now we want to maximize the Q.
       // Since we are a GEM, we need just find a "better" parameter set,
       // so we numerically optimize Q
-      size_t max_optimize_iterations = 100;
       std::vector<double> next_parameters
 	= find_max_Q_numeric( q, 
 			      flatten( current_mixture_parameters ), 
-			      max_optimize_iterations );
+			      gem_parameters.max_optimize_iterations );
+
+      // Ok, now maximize the mixture weights.
+      // We know a closed for solution for this so we maximize independently
+      // from the above maximization
+      std::vector<double> next_mixture_weights =
+	maximize_mixture_weights( data,
+				  mixture_weights,
+				  current_mixture_parameters,
+				  model_likelihood );
+
+      // set current params to maximized set
       current_mixture_parameters = 
 	reconstitute_parameters( current_mixture_parameters,
 				 next_parameters.data() );
+      mixture_weights = next_mixture_weights;
+
 
       // std::cout << "  M-step: p: ";
       // for( size_t i = 0; i < next_parameters.size(); ++i ) {
@@ -382,6 +463,7 @@ namespace probability_core {
 
     // ok, set the current parameters to the output ones
     mle_estimate = current_mixture_parameters;
+    mle_mixture_weights = mixture_weights;
   }
 
 
