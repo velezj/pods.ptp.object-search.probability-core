@@ -93,3 +93,10 @@ add_executable( probability-core-test-slice-sampler-ac
 pods_use_pkg_config_packages( probability-core-test-slice-sampler-ac
   boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
 pods_install_executables( probability-core-test-slice-sampler-ac )
+
+
+add_executable( probability-core-test-em
+  test-em.cpp )
+pods_use_pkg_config_packages( probability-core-test-em
+  boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
+pods_install_executables( probability-core-test-em )
