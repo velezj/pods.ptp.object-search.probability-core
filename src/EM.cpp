@@ -192,11 +192,11 @@ namespace probability_core {
 	}
       }
 
-      std::cout << "  Q-GEM(";
-      for( size_t i = 0; i < flat_params.size(); ++i ) {
-	std::cout << flat_params[i] << ",";
-      }
-      std::cout << ") ll=" << log_lik << std::endl;
+      // std::cout << "  Q-GEM(";
+      // for( size_t i = 0; i < flat_params.size(); ++i ) {
+      // 	std::cout << flat_params[i] << ",";
+      // }
+      // std::cout << ") ll=" << log_lik << std::endl;
 
       // retunr log lik
       return log_lik;
@@ -286,26 +286,26 @@ namespace probability_core {
       if(status)
 	break;
 
-      std::cout << "    .. status: " << status << std::endl;
+      // std::cout << "    .. status: " << status << std::endl;
       double size = gsl_multimin_fminimizer_size (gsl_minimizer);
       status = gsl_multimin_test_size (size, 1e-2);
-      std::cout << "    .. size: " << size 
-		<< ", f(): " << gsl_minimizer->fval 
-		<< ", stop status: " << status << std::endl;
+      // std::cout << "    .. size: " << size 
+      // 		<< ", f(): " << gsl_minimizer->fval 
+      // 		<< ", stop status: " << status << std::endl;
       
     } while( status == GSL_CONTINUE && iteration < max_iterations );
 
-    std::cout << "  Q-max: statux=" << status << std::endl;
+    // std::cout << "  Q-max: statux=" << status << std::endl;
 
     // ok, place found "min" into parameter ouput
     std::vector<double> res
       = math_core::to_vector( gsl_minimizer->x );
 
-    std::cout << "  Q-max: ";
-    for( size_t i = 0; i < res.size(); ++i ) {
-      std::cout << res[i] << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "  Q-max: ";
+    // for( size_t i = 0; i < res.size(); ++i ) {
+    //   std::cout << res[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     // release resources
     gsl_vector_free(gsl_params);
@@ -352,7 +352,7 @@ namespace probability_core {
       // Ok, now we want to maximize the Q.
       // Since we are a GEM, we need just find a "better" parameter set,
       // so we numerically optimize Q
-      size_t max_optimize_iterations = 10;
+      size_t max_optimize_iterations = 100;
       std::vector<double> next_parameters
 	= find_max_Q_numeric( q, 
 			      flatten( current_mixture_parameters ), 
@@ -361,19 +361,19 @@ namespace probability_core {
 	reconstitute_parameters( current_mixture_parameters,
 				 next_parameters.data() );
 
-      std::cout << "  M-step: p: ";
-      for( size_t i = 0; i < next_parameters.size(); ++i ) {
-	std::cout << next_parameters[i] << ",";
-      }
-      std::cout << std::endl;
-      std::cout << "  M-step: ";
-      for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
-	for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
-	  std::cout << current_mixture_parameters[i][j] << ",";
-	}
-	std::cout << " || ";
-      }
-      std::cout << std::endl;
+      // std::cout << "  M-step: p: ";
+      // for( size_t i = 0; i < next_parameters.size(); ++i ) {
+      // 	std::cout << next_parameters[i] << ",";
+      // }
+      // std::cout << std::endl;
+      // std::cout << "  M-step: ";
+      // for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
+      // 	for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
+      // 	  std::cout << current_mixture_parameters[i][j] << ",";
+      // 	}
+      // 	std::cout << " || ";
+      // }
+      // std::cout << std::endl;
 	
       // increas iteration
       ++iteration;
