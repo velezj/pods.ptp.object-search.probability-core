@@ -60,7 +60,7 @@ int main( int argc, char** argv )
   std::vector<double> mle_mixtures;
 
   GEM_parameters_t gem_params;
-  gem_params.max_optimize_iterations = 1000;
+  gem_params.max_optimize_iterations = 100;
   gem_params.stop.max_iterations = 100;
   
   std::function< double(const math_core::nd_point_t& single_data,
