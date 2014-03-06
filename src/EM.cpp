@@ -201,8 +201,8 @@ namespace probability_core {
 	  w = w / norm;
 
 	  double single_lik =
-	    w * lik( data[data_i],
-		     params[mix_i] );
+	    log(w) * log( lik( data[data_i],
+			       params[mix_i] ));
 	  log_lik += single_lik;
 	}
       }
