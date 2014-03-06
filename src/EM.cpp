@@ -4,7 +4,9 @@
 #include "uniform.hpp"
 #include <math-core/gsl_utils.hpp>
 #include <math-core/matrix.hpp>
+#include <math-core/extrema.hpp>
 #include <iostream>
+#include <limits>
 
 namespace probability_core {
 
@@ -263,74 +265,26 @@ namespace probability_core {
 		      const std::vector<double> flat_params,
 		      const size_t max_iterations )
   {
-    const gsl_multimin_fminimizer_type *gsl_T
-      = gsl_multimin_fminimizer_nmsimplex2;
-
-    gsl_multimin_fminimizer *gsl_minimizer = NULL;
-    gsl_multimin_function gsl_func;
-
-    size_t iteration = 0;
-    int status;
-    double gsl_minimizer_size;
-
-    // calculate the total number of parameters
-    size_t param_flat_size = flat_params.size();
-
-    // cover starting parameters to a single start point
-    gsl_vector *gsl_params = math_core::new_gsl_vector( flat_params );
-
-    // setup initial step sizes
-    gsl_vector *step_sizes = gsl_vector_alloc( param_flat_size );
-    gsl_vector_set_all( step_sizes, 1.0 );
-
-    // setup function to minimize
-    gsl_func.n = param_flat_size;
-    gsl_func.f = _x_negative_GEM_mixture_Q_t;
-    gsl_func.params = const_cast<void*>(static_cast<const void*>(&q));
-
-    // setup minimizer
-    gsl_minimizer = gsl_multimin_fminimizer_alloc( gsl_T, param_flat_size );
-    gsl_multimin_fminimizer_set( gsl_minimizer, 
-				 &gsl_func, 
-				 gsl_params, 
-				 step_sizes );
-
-    // iterate minimization
-    do {
-
-      iteration++;
-      status = gsl_multimin_fminimizer_iterate( gsl_minimizer );
-      
-      if(status)
-	break;
-
-      // std::cout << "    .. status: " << status << std::endl;
-      double size = gsl_multimin_fminimizer_size (gsl_minimizer);
-      status = gsl_multimin_test_size (size, 1e-2);
-      // std::cout << "    .. size: " << size 
-      // 		<< ", f(): " << gsl_minimizer->fval 
-      // 		<< ", stop status: " << status << std::endl;
-      
-    } while( status == GSL_CONTINUE && iteration < max_iterations );
-
-    // std::cout << "  Q-max: statux=" << status << std::endl;
-
-    // ok, place found "min" into parameter ouput
-    std::vector<double> res
-      = math_core::to_vector( gsl_minimizer->x );
-
-    // std::cout << "  Q-max: ";
-    // for( size_t i = 0; i < res.size(); ++i ) {
-    //   std::cout << res[i] << " ";
-    // }
-    // std::cout << std::endl;
-
-    // release resources
-    gsl_vector_free(gsl_params);
-    gsl_vector_free(step_sizes);
-    gsl_multimin_fminimizer_free( gsl_minimizer );    
-
-    return res;
+    double val;
+    std::function<double(const std::vector<double>&)> f = q;
+    // HACK:
+    // nlopt seems to think that something which is 0.99 of HUGE_VAL *is* 
+    // infinity!, so we need to make our upper/lower bounds have range
+    // which is less than 0.99 HUGE_VAL, hecen the 0.49 factor!
+    std::vector<double> lb( flat_params.size(), 
+			    0.49 * std::numeric_limits<double>::lowest() );
+    std::vector<double> ub( flat_params.size(), 
+			    0.49 * std::numeric_limits<double>::max() );
+    std::vector<double> max_params
+      = math_core::find_global_extrema
+      ( math_core::stop.max_evaluations( max_iterations ).relative_tolerance(1e-5),
+	f,
+	flat_params,
+	lb,
+	ub,
+	math_core::extrema_maximize,
+	val );
+    return max_params;
   }
 
   //====================================================================
@@ -458,7 +412,12 @@ namespace probability_core {
 	
       // increas iteration
       ++iteration;
-      
+
+      if( *gem_parameters.stop.max_iterations >= 100 ) {
+	if( (iteration) % ( (*gem_parameters.stop.max_iterations) / 100 ) == 0 ) {
+	  std::cout << "GEM[" << iteration << " " << ( (double)iteration / (*gem_parameters.stop.max_iterations) ) * 100 << "%]" << std::endl;
+	}
+      }
     }
 
     // ok, set the current parameters to the output ones
