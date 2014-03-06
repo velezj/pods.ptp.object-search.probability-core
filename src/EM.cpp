@@ -392,6 +392,13 @@ namespace probability_core {
     // loop doing E then M steps
     size_t iteration = 0;
     while( iteration < *gem_parameters.stop.max_iterations ) {
+
+      // are we potentially an output loop iteration
+      bool output_iter = false;
+      if( *gem_parameters.stop.max_iterations >= 100 ) {
+	if( (iteration) % ( (*gem_parameters.stop.max_iterations) / 100 ) == 0 )
+	  output_iter = true;
+      }
     
       // Expectation step (E-step) which really is the conditional
       // expectation given the prameters for the mixture weights (hidden)
@@ -432,38 +439,41 @@ namespace probability_core {
       // 	std::cout << next_parameters[i] << ",";
       // }
       // std::cout << std::endl;
-      std::cout << "  M-step: ";
-      for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
-      	for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
-      	  std::cout << current_mixture_parameters[i][j] << ",";
-      	}
-      	std::cout << " || ";
+      if( output_iter ) {
+	std::cout << "  M-step: ";
+	for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
+	  for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
+	    std::cout << current_mixture_parameters[i][j] << ",";
+	  }
+	  std::cout << " || ";
+	}
+	std::cout << std::endl;
       }
-      std::cout << std::endl;
 
       // print out the current mxing weights
-      std::cout << "  M-step: mixes= ";
-      for( size_t i = 0; i < mixture_weights.size(); ++i ) {
-	std::cout << mixture_weights[i] << " , ";
+      if( output_iter ) {
+	std::cout << "  M-step: mixes= ";
+	for( size_t i = 0; i < mixture_weights.size(); ++i ) {
+	  std::cout << mixture_weights[i] << " , ";
+	}
+	std::cout << std::endl;
       }
-      std::cout << std::endl;
       
       // print out hte current likelihood
-      std::cout << "  M-step: lik= " 
-		<< _likelihood( data,
-				mixture_weights,
-				current_mixture_parameters,
-				model_likelihood )
-		<< std::endl;
-
+      if( output_iter ) {
+	std::cout << "  M-step: lik= " 
+		  << _likelihood( data,
+				  mixture_weights,
+				  current_mixture_parameters,
+				  model_likelihood )
+		  << std::endl;
+      }
 	
       // increas iteration
       ++iteration;
 
-      if( *gem_parameters.stop.max_iterations >= 100 ) {
-	if( (iteration) % ( (*gem_parameters.stop.max_iterations) / 100 ) == 0 ) {
-	  std::cout << "GEM[" << iteration << " " << ( (double)iteration / (*gem_parameters.stop.max_iterations) ) * 100 << "%]" << std::endl;
-	}
+      if( output_iter ) {
+	std::cout << "GEM[" << iteration << " " << ( (double)iteration / (*gem_parameters.stop.max_iterations) ) * 100 << "%]" << std::endl;
       }
     }
 
