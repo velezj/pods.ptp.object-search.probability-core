@@ -43,15 +43,24 @@ int main( int argc, char** argv )
   //   { { 1, 1 }, 
   //     { 3, 6 } };
   std::vector< std::vector<double> > init_params =
-    { { 0.3, 0.1 }, 
-      { 0.7, 0.1 },
-      { 0.5, 0.1 } };
-
+    { { 1.0, 0.1 }, 
+      { 4.0, 0.1 },
+      { 2.0, 0.1 } };
+  std::vector< std::vector<double> > lb =
+    { { -10.0, 0 },
+      { -10.0, 0 },
+      { -10.0, 0 } };
+  std::vector< std::vector<double> > ub =
+    { { 10.0, 20 },
+      { 10.0, 20 },
+      { 10.0, 20 } };
+  
+  
   std::vector<std::vector<double> > mle_params;
   std::vector<double> mle_mixtures;
 
   GEM_parameters_t gem_params;
-  gem_params.max_optimize_iterations = 100;
+  gem_params.max_optimize_iterations = 1000;
   gem_params.stop.max_iterations = 100;
   
   std::function< double(const math_core::nd_point_t& single_data,
@@ -60,6 +69,8 @@ int main( int argc, char** argv )
   run_GEM_mixture_model_MLE_numerical( gem_params,
 				       data,
 				       init_params,
+				       lb,
+				       ub,
 				       test_lik_f,
 				       mle_params,
 				       mle_mixtures);

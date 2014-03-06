@@ -223,6 +223,30 @@ namespace probability_core {
 
   //====================================================================
 
+  // Description:
+  // Computes the lileihood for a parituclar mixture weights+models
+  // for the data
+  double _likelihood
+  (const std::vector<math_core::nd_point_t>& data,
+   const std::vector<double>& mixture_parameters,
+   const std::vector<std::vector< double > >& model_parameters,
+   std::function<double(const math_core::nd_point_t& single_data,
+			const std::vector<double>& params)>& lik)
+  {
+    double p = 0;
+    for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+      math_core::nd_point_t x = data[data_i];
+      for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	double w = mixture_parameters[mix_i];
+	std::vector<double> model = model_parameters[mix_i];
+	p += w * lik(x,model);
+      }
+    }
+    return p;
+  }
+   
+  //====================================================================
+
   double _x_negative_GEM_mixture_Q_t
   ( const gsl_vector* flat_params,
     void* qptr )
@@ -263,21 +287,15 @@ namespace probability_core {
   std::vector<double>
   find_max_Q_numeric( const _GEM_mixture_Q_t& q,
 		      const std::vector<double> flat_params,
+		      const std::vector<double>& lb,
+		      const std::vector<double>& ub,
 		      const size_t max_iterations )
   {
     double val;
     std::function<double(const std::vector<double>&)> f = q;
-    // HACK:
-    // nlopt seems to think that something which is 0.99 of HUGE_VAL *is* 
-    // infinity!, so we need to make our upper/lower bounds have range
-    // which is less than 0.99 HUGE_VAL, hecen the 0.49 factor!
-    std::vector<double> lb( flat_params.size(), 
-			    0.49 * std::numeric_limits<double>::lowest() );
-    std::vector<double> ub( flat_params.size(), 
-			    0.49 * std::numeric_limits<double>::max() );
     std::vector<double> max_params
       = math_core::find_global_extrema
-      ( math_core::stop.max_evaluations( max_iterations ).relative_tolerance(1e-5),
+      ( math_core::stop.max_evaluations( max_iterations ),
 	f,
 	flat_params,
 	lb,
@@ -338,6 +356,8 @@ namespace probability_core {
   ( const GEM_parameters_t& gem_parameters,
     const std::vector<math_core::nd_point_t>& data,
     const std::vector<std::vector<double> >& initial_parameters,
+    const std::vector<std::vector<double> >& param_lower_bounds,
+    const std::vector<std::vector<double> >& param_upper_bounds,
     std::function<double(const math_core::nd_point_t& single_data,
 			 const std::vector<double>& params)>& model_likelihood,
     std::vector<std::vector<double> >& mle_estimate,
@@ -359,6 +379,15 @@ namespace probability_core {
     // keep track of current and old parameters
     std::vector<std::vector<double> > current_mixture_parameters 
       = initial_parameters;
+
+    // print out the initial likelihood
+    std::cout << "GEM: initial lik= "
+	      << _likelihood( data,
+			      mixture_weights,
+			      current_mixture_parameters,
+			      model_likelihood )
+	      << std::endl;
+						      
     
     // loop doing E then M steps
     size_t iteration = 0;
@@ -377,7 +406,9 @@ namespace probability_core {
       // so we numerically optimize Q
       std::vector<double> next_parameters
 	= find_max_Q_numeric( q, 
-			      flatten( current_mixture_parameters ), 
+			      flatten( current_mixture_parameters ),
+			      flatten( param_lower_bounds ),
+			      flatten( param_upper_bounds ),
 			      gem_parameters.max_optimize_iterations );
 
       // Ok, now maximize the mixture weights.
@@ -401,14 +432,30 @@ namespace probability_core {
       // 	std::cout << next_parameters[i] << ",";
       // }
       // std::cout << std::endl;
-      // std::cout << "  M-step: ";
-      // for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
-      // 	for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
-      // 	  std::cout << current_mixture_parameters[i][j] << ",";
-      // 	}
-      // 	std::cout << " || ";
-      // }
-      // std::cout << std::endl;
+      std::cout << "  M-step: ";
+      for( size_t i = 0; i < current_mixture_parameters.size(); ++i ) {
+      	for( size_t j = 0; j < current_mixture_parameters[i].size(); ++j ) {
+      	  std::cout << current_mixture_parameters[i][j] << ",";
+      	}
+      	std::cout << " || ";
+      }
+      std::cout << std::endl;
+
+      // print out the current mxing weights
+      std::cout << "  M-step: mixes= ";
+      for( size_t i = 0; i < mixture_weights.size(); ++i ) {
+	std::cout << mixture_weights[i] << " , ";
+      }
+      std::cout << std::endl;
+      
+      // print out hte current likelihood
+      std::cout << "  M-step: lik= " 
+		<< _likelihood( data,
+				mixture_weights,
+				current_mixture_parameters,
+				model_likelihood )
+		<< std::endl;
+
 	
       // increas iteration
       ++iteration;

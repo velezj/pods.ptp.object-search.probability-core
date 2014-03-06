@@ -47,6 +47,8 @@ namespace probability_core {
   ( const GEM_parameters_t& gem_parameters,
     const std::vector<math_core::nd_point_t>& data,
     const std::vector<std::vector<double> >& initial_parameters,
+    const std::vector<std::vector<double> >& param_lower_bounds,
+    const std::vector<std::vector<double> >& param_upper_bounds,
     std::function<double(const math_core::nd_point_t& single_data,
 			 const std::vector<double>& params)>& model_likelihood,
     std::vector<std::vector<double> >& mle_estimate,
