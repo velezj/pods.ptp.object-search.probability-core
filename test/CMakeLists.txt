@@ -100,3 +100,10 @@ add_executable( probability-core-test-em
 pods_use_pkg_config_packages( probability-core-test-em
   boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
 pods_install_executables( probability-core-test-em )
+
+
+add_executable( probability-core-test-negative-binomial-mle
+  test-negative-binomial-mle.cpp )
+pods_use_pkg_config_packages( probability-core-test-negative-binomial-mle
+  boost-1.54.0 gsl-1.16 p2l-probability-core  lcmtypes_p2l-probability-core )
+pods_install_executables( probability-core-test-negative-binomial-mle )

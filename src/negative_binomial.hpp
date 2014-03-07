@@ -22,6 +22,16 @@ namespace probability_core {
   double 
   variance( const negative_binomial_distribution_t& d );
 
+  
+  // Description:
+  // Return the MLE esptimate for the negative binomail distribution
+  // parmaeters given the set of observations k_i,
+  // where k_i is the number of successes before a certain number of 
+  // failures occur (specified by the r in the distribution)
+  bool
+  mle( const std::vector<size_t>& k, 
+       negative_binomial_distribution_t& nb );
+
 }
 
 
