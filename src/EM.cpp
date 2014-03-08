@@ -5,8 +5,11 @@
 #include <math-core/gsl_utils.hpp>
 #include <math-core/matrix.hpp>
 #include <math-core/extrema.hpp>
+#include <math-core/mpt.hpp>
 #include <iostream>
 #include <limits>
+
+using namespace math_core::mpt;
 
 namespace probability_core {
 
@@ -187,20 +190,20 @@ namespace probability_core {
       // ok, now lets compute the expectation of the data
       // given the model parameter inputs as well as the
       // mixture weights used to construct this Q(.)
-      double log_lik = 0;
+      mp_float log_lik = 0;
       for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
 	for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
-	  double w = 0;
+	  mp_float w = 0;
 	  w = mixture_parameters[mix_i] * lik( data[data_i],
 					       params[mix_i] );
-	  double norm = 0;
+	  mp_float norm = 0;
 	  for( size_t j = 0; j < mixture_parameters.size(); ++j ) {
 	    norm += mixture_parameters[j] * lik( data[data_i],
 						 params[j] );
 	  }
 	  w = w / norm;
 
-	  double single_lik =
+	  mp_float single_lik =
 	    log(w) * log( lik( data[data_i],
 			       params[mix_i] ));
 	  log_lik += single_lik;
@@ -214,7 +217,10 @@ namespace probability_core {
       // std::cout << ") ll=" << log_lik << std::endl;
 
       // retunr log lik
-      return log_lik;
+      if( exp(log_lik) < 1e-10 ) {
+	log_lik = log( 1e-10 );
+      }
+      return log_lik.convert_to<double>();
     }
 
   protected:
@@ -233,7 +239,7 @@ namespace probability_core {
    std::function<double(const math_core::nd_point_t& single_data,
 			const std::vector<double>& params)>& lik)
   {
-    double p = 0;
+    mp_float p = 0;
     for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
       math_core::nd_point_t x = data[data_i];
       for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
@@ -242,7 +248,7 @@ namespace probability_core {
 	p += w * lik(x,model);
       }
     }
-    return p;
+    return p.convert_to<double>();
   }
    
   //====================================================================
@@ -327,13 +333,17 @@ namespace probability_core {
 	math_core::nd_point_t x = data[ data_i ];
 	double t = mixture_parameters[ mix_i ];
 	std::vector<double> params = model_parameters[ mix_i ];
-	double w = t * lik( x, params );
-	double norm_w = 0;
+	mp_float w = t * lik( x, params );
+	mp_float norm_w = 0;
 	for( size_t mix_j = 0; mix_j < mixture_parameters.size(); ++mix_j ) {
 	  norm_w += ( mixture_parameters[mix_j] 
 		      * lik( x, model_parameters[mix_j]) );
 	}
-	T( mix_i, data_i ) = w / norm_w;
+	w /= norm_w;
+	if( w < 1e-11 ) {
+	  w = 0;
+	}
+	T( mix_i, data_i ) = w.convert_to<double>();
       }
     }
 

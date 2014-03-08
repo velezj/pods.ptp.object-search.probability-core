@@ -14,7 +14,7 @@ int main( int argc, char** argv )
   negative_binomial_distribution_t nb0;
   nb0.r = 10;
   nb0.p = 0.1;
-  for( size_t i = 0; i < 1e7; ++i ) {
+  for( size_t i = 0; i < 1e3; ++i ) {
     k.push_back( sample_from( nb0 ) );
   }
 
