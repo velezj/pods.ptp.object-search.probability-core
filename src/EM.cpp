@@ -6,10 +6,12 @@
 #include <math-core/matrix.hpp>
 #include <math-core/extrema.hpp>
 #include <math-core/mpt.hpp>
+#include <math-core/policy_number.hpp>
 #include <iostream>
 #include <limits>
 
 using namespace math_core::mpt;
+
 
 namespace probability_core {
 
@@ -190,22 +192,29 @@ namespace probability_core {
       // ok, now lets compute the expectation of the data
       // given the model parameter inputs as well as the
       // mixture weights used to construct this Q(.)
-      mp_float log_lik = 0;
+      double log_lik = 0;
       for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
 	for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
-	  mp_float w = 0;
-	  w = mixture_parameters[mix_i] * lik( data[data_i],
-					       params[mix_i] );
-	  mp_float norm = 0;
+	  double w = 0.0;
+	  w = (mixture_parameters[mix_i] * lik( data[data_i],
+						params[mix_i] ));
+	  double norm = 0.0;
 	  for( size_t j = 0; j < mixture_parameters.size(); ++j ) {
 	    norm += mixture_parameters[j] * lik( data[data_i],
 						 params[j] );
 	  }
 	  w = w / norm;
-
-	  mp_float single_lik =
-	    log(w) * log( lik( data[data_i],
-			       params[mix_i] ));
+	  
+	  double the_lik = lik( data[data_i],
+				params[mix_i] );
+	  double single_lik = 0.0;
+	  if( w < exp(-20) ||
+	      the_lik < exp(-20) ) {
+	    single_lik = -40;
+	  } else {
+	    single_lik =
+	      (log(w) * log( the_lik ));
+	  }
 	  log_lik += single_lik;
 	}
       }
@@ -216,11 +225,7 @@ namespace probability_core {
       // }
       // std::cout << ") ll=" << log_lik << std::endl;
 
-      // retunr log lik
-      if( exp(log_lik) < 1e-10 ) {
-	log_lik = log( 1e-10 );
-      }
-      return log_lik.convert_to<double>();
+      return log_lik;
     }
 
   protected:
@@ -239,7 +244,7 @@ namespace probability_core {
    std::function<double(const math_core::nd_point_t& single_data,
 			const std::vector<double>& params)>& lik)
   {
-    mp_float p = 0;
+    double p;
     for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
       math_core::nd_point_t x = data[data_i];
       for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
@@ -248,7 +253,7 @@ namespace probability_core {
 	p += w * lik(x,model);
       }
     }
-    return p.convert_to<double>();
+    return p;
   }
    
   //====================================================================
@@ -333,28 +338,38 @@ namespace probability_core {
 	math_core::nd_point_t x = data[ data_i ];
 	double t = mixture_parameters[ mix_i ];
 	std::vector<double> params = model_parameters[ mix_i ];
-	mp_float w = t * lik( x, params );
-	mp_float norm_w = 0;
+	double w ( t * lik( x, params ) );
+	double norm_w;
 	for( size_t mix_j = 0; mix_j < mixture_parameters.size(); ++mix_j ) {
 	  norm_w += ( mixture_parameters[mix_j] 
 		      * lik( x, model_parameters[mix_j]) );
 	}
 	w /= norm_w;
-	if( w < 1e-11 ) {
-	  w = 0;
-	}
-	T( mix_i, data_i ) = w.convert_to<double>();
+	T( mix_i, data_i ) = w;
       }
     }
 
     // Ok, compute maximum new mixture weights given T
     std::vector<double> new_mixture_weights( mixture_parameters.size(), 0.0 );
+    double sum_w = 0.0;
     for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
       double w = 0;
       for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
 	w += T( mix_i, data_i );
       }
       new_mixture_weights[ mix_i ] = w / data.size();
+      
+      // cap down weights to 0 if too small!
+      if( new_mixture_weights[ mix_i ] < 1.0e-20 ) {
+	new_mixture_weights[ mix_i ] = 0.0;
+      }
+      sum_w += new_mixture_weights[ mix_i ];
+    }
+
+    // renormalize the mixture weights in case clamping down changed
+    // something in the weights
+    for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
+      new_mixture_weights[ i ] /= sum_w;
     }
     
     return new_mixture_weights;
@@ -400,6 +415,7 @@ namespace probability_core {
 						      
     
     // loop doing E then M steps
+    double previous_likelihood = 0.0;
     size_t iteration = 0;
     while( iteration < *gem_parameters.stop.max_iterations ) {
 
@@ -444,6 +460,13 @@ namespace probability_core {
       mixture_weights = next_mixture_weights;
 
 
+      // calculate the new likleihood
+      double new_likelihood =
+	_likelihood( data,
+		     mixture_weights,
+		     current_mixture_parameters,
+		     model_likelihood );
+	
       // std::cout << "  M-step: p: ";
       // for( size_t i = 0; i < next_parameters.size(); ++i ) {
       // 	std::cout << next_parameters[i] << ",";
@@ -472,10 +495,7 @@ namespace probability_core {
       // print out hte current likelihood
       if( output_iter ) {
 	std::cout << "  M-step: lik= " 
-		  << _likelihood( data,
-				  mixture_weights,
-				  current_mixture_parameters,
-				  model_likelihood )
+		  << new_likelihood
 		  << std::endl;
       }
 	
@@ -485,6 +505,20 @@ namespace probability_core {
       if( output_iter ) {
 	std::cout << "GEM[" << iteration << " " << ( (double)iteration / (*gem_parameters.stop.max_iterations) ) * 100 << "%]" << std::endl;
       }
+
+      // check if we need to stop because of relative tolerance 
+      // on the likelihood
+      if( gem_parameters.stop.relative_likelihood_tolerance ) {
+	double tol = 
+	  (*gem_parameters.stop.relative_likelihood_tolerance) 
+	  * previous_likelihood;
+	if( fabs( new_likelihood - previous_likelihood ) < tol ) {
+	  // we are done! tolerance reached
+	  break;
+	}
+      }
+      
+      previous_likelihood = new_likelihood;
     }
 
     // ok, set the current parameters to the output ones

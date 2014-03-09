@@ -17,6 +17,7 @@ namespace probability_core {
   struct GEM_stopping_criteria_t
   {
     boost::optional<size_t> max_iterations;
+    boost::optional<double> relative_likelihood_tolerance;
 
     GEM_stopping_criteria_t() : max_iterations(100) {}
   };
