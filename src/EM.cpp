@@ -9,6 +9,7 @@
 #include <math-core/policy_number.hpp>
 #include <iostream>
 #include <limits>
+#include <cmath>
 
 using namespace math_core::mpt;
 
@@ -209,7 +210,11 @@ namespace probability_core {
 				params[mix_i] );
 	  double single_lik = 0.0;
 	  if( w < exp(-20) ||
-	      the_lik < exp(-20) ) {
+	      the_lik < exp(-20) ||
+	      std::isnan(w) ||
+	      std::isinf(w) ||
+	      std::isnan( the_lik ) ||
+	      std::isinf( the_lik ) ) {
 	    single_lik = -40;
 	  } else {
 	    single_lik =
@@ -279,7 +284,7 @@ namespace probability_core {
     std::vector<double> mix;
     double sum = 0;
     for( size_t i = 0; i < initial_parameters.size(); ++i ) {
-      mix.push_back( sample_from( uniform_distribution(0.0, 1.0)));
+      mix.push_back( sample_from( uniform_distribution(1.0e-5, 1.0)));
       sum += mix[ mix.size() - 1 ];
     }
     for( size_t i = 0; i < mix.size(); ++i ) {
@@ -333,6 +338,8 @@ namespace probability_core {
 
     Eigen::MatrixXd T( mixture_parameters.size(),
 		       data.size() );
+    Eigen::MatrixXd UnormT( mixture_parameters.size(),
+			    data.size() );
     for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
       for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
 	math_core::nd_point_t x = data[ data_i ];
@@ -344,6 +351,7 @@ namespace probability_core {
 	  norm_w += ( mixture_parameters[mix_j] 
 		      * lik( x, model_parameters[mix_j]) );
 	}
+	UnormT( mix_i, data_i ) = w;
 	w /= norm_w;
 	T( mix_i, data_i ) = w;
       }
@@ -360,7 +368,9 @@ namespace probability_core {
       new_mixture_weights[ mix_i ] = w / data.size();
       
       // cap down weights to 0 if too small!
-      if( new_mixture_weights[ mix_i ] < 1.0e-20 ) {
+      if( new_mixture_weights[ mix_i ] < 1.0e-20 ||
+	  std::isnan( new_mixture_weights[mix_i] ) ||
+	  std::isinf( new_mixture_weights[mix_i] ) ) {
 	new_mixture_weights[ mix_i ] = 0.0;
       }
       sum_w += new_mixture_weights[ mix_i ];
@@ -368,8 +378,20 @@ namespace probability_core {
 
     // renormalize the mixture weights in case clamping down changed
     // something in the weights
-    for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
-      new_mixture_weights[ i ] /= sum_w;
+    if( sum_w > 0 ) {
+      for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
+	new_mixture_weights[ i ] /= sum_w;
+      }
+    } else {
+      //really! let's jsut uniform it then!
+      std::cout << "MIXTURES-SUM=0!!: " <<std::endl;
+      std::cout << "  Normed T:" << std::endl;
+      std::cout << T << std::endl;
+      std::cout << "  Un-Normed T:" << std::endl;
+      std::cout << UnormT << std::endl;
+      for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
+	new_mixture_weights[i] = 1.0 / new_mixture_weights.size();
+      }
     }
     
     return new_mixture_weights;
@@ -421,7 +443,9 @@ namespace probability_core {
 
       // are we potentially an output loop iteration
       bool output_iter = false;
-      if( *gem_parameters.stop.max_iterations >= 100 ) {
+      if( *gem_parameters.stop.max_iterations >= 100 &&
+	  ( gem_parameters.stop.relative_likelihood_tolerance == false || 
+	    iteration > 0.25 * ( *gem_parameters.stop.max_iterations ) ) ) {
 	if( (iteration) % ( (*gem_parameters.stop.max_iterations) / 100 ) == 0 )
 	  output_iter = true;
       }
