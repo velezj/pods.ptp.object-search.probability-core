@@ -4,10 +4,14 @@
 
 #include <functional>
 #include <math-core/geom.hpp>
+#include <math-core/matrix.hpp>
+#include <math-core/io.hpp>
 #include <boost/optional.hpp>
+#include <math-core/exception.hpp>
 
 namespace probability_core {
 
+  using namespace math_core;
 
   //====================================================================
 
@@ -60,6 +64,52 @@ namespace probability_core {
   //====================================================================
   //====================================================================
   //====================================================================
+  //====================================================================
+
+  // Description:
+  // Exceptions and error info objects for EM
+  struct GEM_exception_t : virtual math_core::base_exception_t {};
+
+  
+  typedef boost::error_info<struct tag_reason,std::string> 
+  errorinfo_reason;
+  
+  typedef boost::error_info<struct tag_last_gem_model_parameters,
+			    std::vector<double> > 
+  errorinfo_last_gem_model_parameters;
+
+  typedef boost::error_info<struct tag_last_gem_mixture_weights,
+			    std::vector<double> > 
+  errorinfo_last_gem_mixture_weights;
+
+  typedef boost::error_info<struct tag_last_gem_likelihood,
+			    double > 
+  errorinfo_last_gem_likelihood;
+
+  typedef boost::error_info<struct tag_last_maxmix_mixture_weights,
+			    std::vector<double> > 
+  errorinfo_last_maxmix_mixture_weights;
+  
+  typedef boost::error_info<struct tag_last_maxmix_unorm_T,
+			    Eigen::MatrixXd > 
+  errorinfo_last_maxmix_unorm_T;
+
+  typedef boost::error_info<struct tag_last_Q_mixture_weights,
+			    std::vector<double> > 
+  errorinfo_last_Q_mixture_weights;
+
+  typedef boost::error_info<struct tag_last_Q_model_parameters,
+			    std::vector<double> > 
+  errorinfo_last_Q_model_parameters;
+
+  typedef boost::error_info<struct tag_last_Q_parameters_x,
+			    std::vector<double> > 
+  errorinfo_last_Q_parameters_x;
+  
+  typedef boost::error_info<struct tag_last_Q_likelihood,
+			    double > 
+  errorinfo_last_Q_log_likelihood;
+  
   //====================================================================
 
 
