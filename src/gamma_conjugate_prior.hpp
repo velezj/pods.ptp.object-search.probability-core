@@ -70,7 +70,10 @@ namespace probability_core {
     likelihood( const gamma_distribution_t& gamma, 
 		const gamma_conjugate_prior_t& gcp );
     
-    
+
+    double
+    log_likelihood( const gamma_distribution_t& gamma,
+		    const gamma_conjugate_prior_t& gcp );
   }
 
 }

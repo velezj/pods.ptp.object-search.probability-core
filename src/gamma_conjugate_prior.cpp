@@ -255,7 +255,9 @@ namespace probability_core {
     gamma_distribution_t g;
     g.shape = args.coordinate[0];
     g.rate = args.coordinate[1];
-    return testing_true::likelihood( g, gcp ).convert_to<double>();
+    //return testing_true::likelihood( g, gcp ).convert_to<double>();
+    double ll = testing_true::log_likelihood( g, gcp );
+    return exp( ll );
   }
 
   gamma_distribution_t
@@ -327,12 +329,44 @@ namespace probability_core {
     }
 
     //====================================================================
+    
+    double
+    log_likelihood( const gamma_distribution_t& gamma,
+		    const gamma_conjugate_prior_t& gcp )
+    {
+      
+      using boost::math::lgamma;
+      
+      double a = gamma.shape;
+      double b = gamma.rate;
+      double p = gcp.p;
+      double q = gcp.q;
+      double r = gcp.r;
+      double s = gcp.s;
+      double lg = lgamma( a );
+      double ll = (a-1) * log(p) - (b * q) - r * lg + (a * s * log(b) );
+      if( !std::isfinite( ll ) ) {
+	std::cout << "!finite log_lik: " << a << " "
+		  << b << " "
+		  << p << " "
+		  << q << " "
+		  << r << " "
+		  << s << " "
+		  << lg << " "
+		  << log(p) << " "
+		  << log(b)
+		  << std::endl;
+      }
+      return ll;
+    }
+    
     //====================================================================
     //====================================================================
     //====================================================================
     //====================================================================
     //====================================================================
-
+    //====================================================================
+    
   }
 
   //====================================================================

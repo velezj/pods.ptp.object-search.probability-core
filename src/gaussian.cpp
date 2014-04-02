@@ -86,6 +86,12 @@ namespace probability_core {
       return gsl_cdf_gaussian_P( (x - point(d.means)).component[0],
 				 sqrt(d.covariance.data[0]) );
 
+    // assumes diagonal covariance!
+    return gsl_cdf_gaussian_P( (x.coordinate[0] - d.means[0] ),
+			       sqrt( d.covariance.data[0] ) )
+      * gsl_cdf_gaussian_P( (x.coordinate[1] - d.means[1] ),
+			    sqrt( d.covariance.data[3] ) );
+
     // Ok, for 2D CDF, we need to standardize the input
     // ( zero mean centered, divide by standard div )
     // THIS is ONLY for DIAGONAL CoVARIANCES
