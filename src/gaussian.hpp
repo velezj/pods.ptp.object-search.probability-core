@@ -6,9 +6,29 @@
 #include <lcmtypes/p2l_math_core.hpp>
 #include <math-core/geom.hpp>
 #include <math-core/math_function.hpp>
+#include <math-core/matrix.hpp>
+#include <boost/optional.hpp>
 
 namespace probability_core {
 
+
+  class gaussian_distribution_t
+  {
+  public:
+    size_t                dimension;
+    std::vector< double > means;
+    math_core::dense_matrix_t covariance;
+    Eigen::MatrixXd inverse_covariance() const {
+      if( !_inverse_covariance ) {
+	const_cast<gaussian_distribution_t*>(this)->_inverse_covariance 
+	  = to_eigen_mat( covariance ).inverse();
+      }
+      return *_inverse_covariance;
+    }
+  protected:
+     boost::optional<Eigen::MatrixXd> _inverse_covariance;
+  };
+  
   // Description:
   // Gaussian Distribution
 

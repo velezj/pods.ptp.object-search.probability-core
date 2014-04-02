@@ -26,6 +26,26 @@ namespace probability_core {
   {
     assert( x.n == gaussian.dimension );
     unsigned long n = gaussian.dimension;
+
+    // special case for 1D gaussians
+    if( n == 1 ) {
+      double mean = gaussian.means[0];
+      double sigma = sqrt( gaussian.covariance.data[0] );
+      return gsl_ran_gaussian_pdf( x.coordinate[0] - mean, sigma );
+    }
+
+    // special case for 2D diagonal covariance
+    if( n == 2 &&
+	fabs( gaussian.covariance.data[1] ) < 1.0e-20 &&
+	fabs( gaussian.covariance.data[2] ) < 1.0e-20 ) {
+      double mean0 = gaussian.means[0];
+      double mean1 = gaussian.means[1];
+      double sigma0 = sqrt( gaussian.covariance.data[0] );
+      double sigma1 = sqrt( gaussian.covariance.data[3] );
+      return gsl_ran_gaussian_pdf( x.coordinate[0] - mean0, sigma0 )
+	* gsl_ran_gaussian_pdf( x.coordinate[1] - mean1, sigma1 );
+    }
+
     Eigen::MatrixXd cov = to_eigen_mat( gaussian.covariance );
     nd_point_t mean = point( n, gaussian.means );
     Eigen::VectorXd mean_diff = to_eigen_mat( x - mean );
@@ -108,7 +128,7 @@ namespace probability_core {
     // draw standard normals
     Eigen::VectorXd draws( gaussian.dimension );
     for( int64_t i = 0; i < gaussian.dimension; ++i ) {
-      draws( i ) = gsl_ran_gaussian( global_rng(), 1.0 );
+      draws( i ) = gsl_ran_gaussian_ziggurat( global_rng(), 1.0 );
     }
 
     // now add the mean and the decomposed covariance
