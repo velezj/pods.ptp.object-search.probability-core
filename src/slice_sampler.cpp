@@ -31,35 +31,58 @@ namespace probability_core {
     typedef multi_slice_t slice_t;
     
     // get the height of the previous x, then sample uniformly for a level
-    double max_y = f( workplace.previous_x );
+    slice_sampler_workplace_t<nd_point_t> workplace_copy = workplace;
+    double max_y = f( workplace_copy.previous_x );
 
     int count_level_finds = 0;
     while( max_y == 0 ) {
       if( (count_level_finds + 1) % 1000 == 0 ) {
-	std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
+	if( (count_level_finds + 1) % 10000 == 0 ) {
+	  std::cout << "slice_sample | bad max_y " << max_y << " at " << workplace_copy.previous_x << " [" << count_level_finds << "]" << std::endl;
+	}
 	
 	// let's make sure we have at least one
 	// non-zero in support
 	int count = 0;
+	nd_point_t min_x, max_x;
 	for( nd_point_t x = workplace.support.first;
 	     point_lexicographical_compare( x, workplace.support.second);
 	     x = x + 0.00001 * ( workplace.support.second - workplace.support.first ) ) {
 	  
 	  double p = f( x );
 	  if( p > 0 ) {
+	    if( count == 0) {
+	      min_x = x;
+	      max_x = x;
+	    }
+	    if( point_lexicographical_compare( max_x, x ) ) {
+	      max_x = x;
+	    }
 	    count++;
 	  }
 	}
-	std::cout << "  -- nonzero's = " << count << std::endl;
-	  
+	if( (count_level_finds + 1) % 10000 == 0 ) {
+	  std::cout << "  -- nonzero's = " << count;
+	}
+	if( count > 0 ) {
+	  if( (count_level_finds + 1) % 10000 == 0 ) {
+	    std::cout << "  set support: " << min_x << " " << max_x;
+	  }
+	  workplace_copy.support.first = min_x;
+	  workplace_copy.support.second = max_x;
+	}
+	if( (count_level_finds + 1) % 10000 == 0 ) {
+	  std::cout << std::endl;
+	}
       }
-      workplace.reset();
-      max_y = f( workplace.previous_x );
+      workplace_copy.reset();
+      max_y = f( workplace_copy.previous_x );
       ++count_level_finds;
     }
     if( count_level_finds > 0 ) {
       //std::cout << "final slice_sample | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
     }
+    workplace.previous_x = workplace_copy.previous_x;
     double level_y = sample_from( uniform_distribution<double>( 0.0, max_y ) ); 
 
     //std::cout << "slice_sample | prev_x: " << workplace.previous_x << " max_y: " << max_y << " level: " << level_y << std::endl;

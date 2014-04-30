@@ -70,7 +70,7 @@ namespace probability_core {
     Range_Type max_y = f( workplace.previous_x );
     int count_level_finds = 0;
     while( max_y == 0 ) {
-      if( (count_level_finds + 1) % 1000 == 0 ) {
+      if( (count_level_finds + 1) % 100000 == 0 ) {
 	std::cout << "slice_sample_1d | bad max_y " << max_y << " at " << workplace.previous_x << " [" << count_level_finds << "]" << std::endl;
       }
       workplace.reset();
