@@ -2,8 +2,11 @@
 #define __PROBABILITY_CORE_DISCRETE_HPP__
 
 #include "types.hpp"
+#include <cstdint>
 
 namespace probability_core {
+
+  using std::int32_t;
 
   // Description:
   // Discrete Distribution

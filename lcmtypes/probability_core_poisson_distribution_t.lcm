@@ -1,7 +1,0 @@
-
-package probability_core;
-
-struct poisson_distribution_t
-{
-	double lambda;
-}

@@ -16,12 +16,6 @@ pods_use_pkg_config_packages( test-gaussian gsl-1.16 p2l-probability-core   )
 pods_install_executables( test-gaussian )
 
 
-add_executable( test-graphics
-  test-graphics.cpp )
-pods_use_pkg_config_packages( test-graphics p2l-probability-core-graphics )
-pods_install_executables( test-graphics )
-
-
 add_executable( test-rejection-sampler
   test-rejection-sampler.cpp )
 pods_use_pkg_config_packages( test-rejection-sampler p2l-probability-core    p2l-math-core  boost-1.54.0)

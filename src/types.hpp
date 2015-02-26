@@ -2,7 +2,12 @@
 #if !defined __PROBABILITY_CORE_types_HPP__
 #define __PROBABILITY_CORE_types_HPP__
 
+#include <cstddef>
+#include <vector>
+
 namespace probability_core {
+
+  using std::size_t;
 
   //===================================================================
 
