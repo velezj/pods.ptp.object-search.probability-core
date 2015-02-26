@@ -1,7 +1,7 @@
 #if !defined( __PROBABILITY_CORE_POISSON_HPP__ )
 #define __PROBABILITY_CORE_POISSON_HPP__
 
-#include "lcmtypes/p2l_probability_core.hpp"
+#include "types.hpp"
 
 namespace probability_core {
 

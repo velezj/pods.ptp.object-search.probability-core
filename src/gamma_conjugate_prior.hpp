@@ -1,7 +1,7 @@
 #if !defined( __PROBABILITY_CORE_GAMMA_CONJUGATE_PRIOR_HPP__ )
 #define __PROBABILITY_CORE_GAMMA_CONJUGATE_PRIOR_HPP__
 
-#include "lcmtypes/p2l_probability_core.hpp"
+#include "types.hpp"
 #include <math-core/mpt.hpp>
 #include <math-core/geom.hpp>
 //#include "slice_sampler.hpp"
