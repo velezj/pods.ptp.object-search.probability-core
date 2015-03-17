@@ -8,8 +8,8 @@
 #include <boost/function.hpp>
 #include <utility>
 #include <iostream>
-#include <p2l-common/stat_counter.hpp>
-#include <p2l-common/context.hpp>
+#include <object-search.common/stat_counter.hpp>
+#include <object-search.common/context.hpp>
 
 
 namespace probability_core {

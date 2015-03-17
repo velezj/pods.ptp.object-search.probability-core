@@ -5,7 +5,7 @@ cmake_policy( SET CMP0026 OLD )
 
 
 # pull in the pods macros. See cmake/pods.cmake for documentation
-set(POD_NAME p2l-probability-core)
+set(POD_NAME object-search.probability-core)
 include(cmake/pods.cmake)
 
 
@@ -24,7 +24,7 @@ endif (USE_PEDANTIC)
 
 
 # The probability-core library
-add_library( p2l-probability-core SHARED
+add_library( object-search.probability-core SHARED
   src/core.cpp
   src/gamma.cpp
   src/beta.cpp
@@ -62,18 +62,18 @@ pods_install_headers(
   src/EM.hpp
   DESTINATION
   probability-core )
-pods_use_pkg_config_packages(p2l-probability-core
+pods_use_pkg_config_packages(object-search.probability-core
   gsl
-  p2l-common
-  p2l-math-core
+  object-search.common
+  object-search.math-core
   boost-1.54.0
   boost-1.54.0-system
   boost-1.54.0-thread)
-pods_install_libraries( p2l-probability-core )
-pods_install_pkg_config_file(p2l-probability-core
+pods_install_libraries( object-search.probability-core )
+pods_install_pkg_config_file(object-search.probability-core
     CFLAGS
-    LIBS -lp2l-probability-core
-    REQUIRES gsl-1.16 p2l-common p2l-math-core boost-1.54.0 boost-1.54.0-system boost-1.54.0-thread
+    LIBS -lobject-search.probability-core
+    REQUIRES gsl-1.16 object-search.common object-search.math-core boost-1.54.0 boost-1.54.0-system boost-1.54.0-thread
     VERSION 0.0.1)
 
 

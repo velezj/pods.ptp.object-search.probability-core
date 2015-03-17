@@ -16,8 +16,8 @@
 #include <cmath>
 #include <math-core/io.hpp>
 #include <stdexcept>
-#include <p2l-common/stat_counter.hpp>
-#include <p2l-common/context.hpp>
+#include <object-search.common/stat_counter.hpp>
+#include <object-search.common/context.hpp>
 
 namespace probability_core {
 
