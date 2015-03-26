@@ -12,6 +12,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 using namespace math_core::mpt;
 
@@ -291,10 +292,12 @@ namespace probability_core {
 	  double t = mixture_parameters[ mix_i ];
 	  std::vector<double> params = model_parameters[ mix_i ];
 	  double w ( t * lik( x, params ) );
-	  double norm_w;
+	  //double w = ( lik( x, params ) );
+	  double norm_w = 0.0;
 	  for( size_t mix_j = 0; mix_j < mixture_parameters.size(); ++mix_j ) {
 	    norm_w += ( mixture_parameters[mix_j] 
 			* lik( x, model_parameters[mix_j]) );
+	    //norm_w += ( lik( x, model_parameters[mix_j]) );
 	  }
 	  UnormT( mix_i, data_i ) = w;
 	  w /= norm_w;
@@ -329,11 +332,11 @@ namespace probability_core {
 	}
       } else {
 	//really! let's jsut uniform it then!
-	std::cout << "MIXTURES-SUM=0!!: " <<std::endl;
-	std::cout << "  Normed T:" << std::endl;
-	std::cout << T << std::endl;
-	std::cout << "  Un-Normed T:" << std::endl;
-	std::cout << UnormT << std::endl;
+	// std::cout << "MIXTURES-SUM=0!!: " <<std::endl;
+	// std::cout << "  Normed T:" << std::endl;
+	// std::cout << T << std::endl;
+	// std::cout << "  Un-Normed T:" << std::endl;
+	// std::cout << UnormT << std::endl;
 	for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
 	  new_mixture_weights[i] = 1.0 / new_mixture_weights.size();
 	}
@@ -343,6 +346,57 @@ namespace probability_core {
       *storedUT = UnormT;
       _last_maxmix_mixture_weights.reset( new std::vector<double>( new_mixture_weights ) );
       _last_maxmix_unorm_T.reset( storedUT );
+
+      // debug
+      // print out the entire process
+      if( false ) {
+	std::cout << "max mixture weights:" << std::endl;
+	for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	  std::vector<double> params = model_parameters[mix_i];
+	  std::cout << "    model[" << mix_i << "]: ";
+	  for( size_t i = 0; i < params.size(); ++i ) {
+	    std::cout << params[i] << " , ";
+	  }
+	  std::cout << std::endl;
+	}
+	for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	  std::cout << "    data[" << data_i << "]: "
+		    << data[data_i]
+		    << std::endl;
+	}
+	std::cout << "    initial mixture: ";
+	for( double k : mixture_parameters ) {
+	  std::cout << k << " , ";
+	}
+	std::cout << std::endl;
+	std::cout << "    initial lik: "
+		  << _likelihood( data, mixture_parameters, model_parameters, lik)
+		  << std::endl;
+	for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	  for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	    std::cout << "    T( mix " << mix_i << " , " << data_i << " ) = "
+		      << T( mix_i, data_i )
+		      << " [w=" << mixture_parameters[mix_i]
+		      << " , lik=" << lik( data[data_i], model_parameters[mix_i])
+		      << "]" << std::endl;
+	  }
+	}
+	std::cout << "    new mixture: ";
+	for( double k : new_mixture_weights ) {
+	  std::cout << k << " , ";
+	}
+	std::cout << std::endl;
+	std::cout << "    new lik: "
+		  << _likelihood( data, new_mixture_weights, model_parameters, lik)
+		  << std::endl;
+	std::vector<double> rev_mixture_weights = new_mixture_weights;
+	std::reverse( rev_mixture_weights.begin(),
+		      rev_mixture_weights.end() );
+	std::cout << "    reverse lik: "
+		  << _likelihood( data, rev_mixture_weights, model_parameters, lik)
+		  << std::endl;
+      }
+      
       
       return new_mixture_weights;
 
@@ -357,6 +411,151 @@ namespace probability_core {
       throw;
     }
   }
+
+  //====================================================================
+  
+  std::vector<double>
+  maximize_mixture_weights_OLD_BROKEN
+  ( const std::vector<math_core::nd_point_t>& data,
+    const std::vector<double>& mixture_parameters,
+    const std::vector<std::vector< double > >& model_parameters,
+    std::function<double(const math_core::nd_point_t& single_data,
+			 const std::vector<double>& params)>& lik )
+  {
+
+    // closed form solution see wikipedia, gaussian mixture example
+    // http://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm
+
+    // catch any exception ad add information about what happened last here
+    try {
+
+      Eigen::MatrixXd T( mixture_parameters.size(),
+			 data.size() );
+      Eigen::MatrixXd UnormT( mixture_parameters.size(),
+			      data.size() );
+      for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	  math_core::nd_point_t x = data[ data_i ];
+	  double t = mixture_parameters[ mix_i ];
+	  std::vector<double> params = model_parameters[ mix_i ];
+	  double w ( t * lik( x, params ) );
+	  double norm_w;
+	  for( size_t mix_j = 0; mix_j < mixture_parameters.size(); ++mix_j ) {
+	    norm_w += ( mixture_parameters[mix_j] 
+	    		* lik( x, model_parameters[mix_j]) );
+	    
+	  }
+	  UnormT( mix_i, data_i ) = w;
+	  w /= norm_w;
+	  T( mix_i, data_i ) = w;
+	}
+      }
+      
+      // Ok, compute maximum new mixture weights given T
+      std::vector<double> new_mixture_weights( mixture_parameters.size(), 0.0 );
+      double sum_w = 0.0;
+      for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	double w = 0;
+	for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	  w += T( mix_i, data_i );
+	}
+	new_mixture_weights[ mix_i ] = w / data.size();
+	
+	// cap down weights to 0 if too small!
+	if( new_mixture_weights[ mix_i ] < 1.0e-20 ||
+	    std::isnan( new_mixture_weights[mix_i] ) ||
+	    std::isinf( new_mixture_weights[mix_i] ) ) {
+	  new_mixture_weights[ mix_i ] = 0.0;
+	}
+	sum_w += new_mixture_weights[ mix_i ];
+      }
+      
+      // renormalize the mixture weights in case clamping down changed
+      // something in the weights
+      if( sum_w > 0 ) {
+	for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
+	  new_mixture_weights[ i ] /= sum_w;
+	}
+      } else {
+	//really! let's jsut uniform it then!
+	// std::cout << "MIXTURES-SUM=0!!: " <<std::endl;
+	// std::cout << "  Normed T:" << std::endl;
+	// std::cout << T << std::endl;
+	// std::cout << "  Un-Normed T:" << std::endl;
+	// std::cout << UnormT << std::endl;
+	for( size_t i = 0; i < new_mixture_weights.size(); ++i ) {
+	  new_mixture_weights[i] = 1.0 / new_mixture_weights.size();
+	}
+      }
+      
+      Eigen::MatrixXd *storedUT = new Eigen::MatrixXd();
+      *storedUT = UnormT;
+      _last_maxmix_mixture_weights.reset( new std::vector<double>( new_mixture_weights ) );
+      _last_maxmix_unorm_T.reset( storedUT );
+
+      // debug
+      // print out the entire process
+      std::cout << "max mixture weights:" << std::endl;
+      for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	std::vector<double> params = model_parameters[mix_i];
+	std::cout << "    model[" << mix_i << "]: ";
+	for( size_t i = 0; i < params.size(); ++i ) {
+	  std::cout << params[i] << " , ";
+	}
+	std::cout << std::endl;
+      }
+      for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	std::cout << "    data[" << data_i << "]: "
+		  << data[data_i]
+		  << std::endl;
+      }
+      std::cout << "    initial mixture: ";
+      for( double k : mixture_parameters ) {
+	std::cout << k << " , ";
+      }
+      std::cout << std::endl;
+      std::cout << "    initial lik: "
+		<< _likelihood( data, mixture_parameters, model_parameters, lik)
+		<< std::endl;
+      for( size_t mix_i = 0; mix_i < mixture_parameters.size(); ++mix_i ) {
+	for( size_t data_i = 0; data_i < data.size(); ++data_i ) {
+	  std::cout << "    T( mix " << mix_i << " , " << data_i << " ) = "
+		    << T( mix_i, data_i )
+		    << " [w=" << mixture_parameters[mix_i]
+		    << " , lik=" << lik( data[data_i], model_parameters[mix_i])
+		    << "]" << std::endl;
+	}
+      }
+      std::cout << "    new mixture: ";
+      for( double k : new_mixture_weights ) {
+	std::cout << k << " , ";
+      }
+      std::cout << std::endl;
+      std::cout << "    new lik: "
+		<< _likelihood( data, new_mixture_weights, model_parameters, lik)
+		<< std::endl;
+      std::vector<double> rev_mixture_weights = new_mixture_weights;
+      std::reverse( rev_mixture_weights.begin(),
+		    rev_mixture_weights.end() );
+      std::cout << "    reverse lik: "
+		<< _likelihood( data, rev_mixture_weights, model_parameters, lik)
+		<< std::endl;
+      
+      
+      return new_mixture_weights;
+
+    } 
+    catch( boost::exception& e ) {
+      if( _last_maxmix_mixture_weights.get() ) {
+	e << errorinfo_last_maxmix_mixture_weights( *_last_maxmix_mixture_weights );
+      }
+      if( _last_maxmix_unorm_T.get() ) {
+	e << errorinfo_last_maxmix_unorm_T( *_last_maxmix_unorm_T );
+      }
+      throw;
+    }
+  }
+
 
   //====================================================================
 
